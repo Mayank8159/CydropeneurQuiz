@@ -1,20 +1,34 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { scanQuestions } from "../lib/dynamo";
-import { success, serverError } from "../lib/responses";
+import {
+  DynamoDBClient,
+  ScanCommand,
+} from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
-export async function handler(
-  _event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> {
+const client = new DynamoDBClient({});
+const TABLE = process.env.SST_RESOURCE_QuestionsTable!;
+
+export async function handler() {
   try {
-    const questions = await scanQuestions();
+    const result = await client.send(new ScanCommand({ TableName: TABLE }));
+    const items = (result.Items || []).map((i) => unmarshall(i));
+    items.sort((a, b) => (a.qNumber as number) - (b.qNumber as number));
 
-    const sanitized = questions
-      .sort((a, b) => a.qNumber - b.qNumber)
-      .map(({ correctAnswer, ...rest }) => rest);
+    const sanitized = items.map(({ correctAnswer, ...rest }) => rest);
 
-    return success(sanitized);
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(sanitized),
+    };
   } catch (error) {
-    console.error("Error fetching questions:", error);
-    return serverError("Failed to fetch questions");
+    console.error("Error:", error);
+    return {
+      statusCode: 500,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ message: "Failed to fetch questions" }),
+    };
   }
 }

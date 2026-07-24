@@ -1,69 +1,80 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { v4 as uuidv4 } from "uuid";
-import { scanQuestions, putSubmission, scanSubmissions } from "../lib/dynamo";
-import { success, badRequest, serverError } from "../lib/responses";
+import {
+  DynamoDBClient,
+  ScanCommand,
+  PutCommand,
+} from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { randomUUID } from "crypto";
 
-interface SubmitBody {
-  playerName: string;
-  answers: Record<string, string>;
-  timeElapsedMs: number;
-}
+const client = new DynamoDBClient({});
+const QUESTIONS_TABLE = process.env.SST_RESOURCE_QuestionsTable!;
+const SUBMISSIONS_TABLE = process.env.SST_RESOURCE_SubmissionsTable!;
 
-export async function handler(
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> {
+export async function handler(event: any) {
   try {
-    if (!event.body) {
-      return badRequest("Request body is required");
+    const body = JSON.parse(event.body || "{}");
+    const { playerName, answers, timeElapsedMs } = body;
+
+    if (!playerName || !answers || timeElapsedMs === undefined) {
+      return {
+        statusCode: 400,
+        headers: { "Access-Control-Allow-Origin": "*" },
+        body: JSON.stringify({ message: "playerName, answers, and timeElapsedMs are required" }),
+      };
     }
 
-    const body: SubmitBody = JSON.parse(event.body);
-
-    if (!body.playerName || !body.answers || body.timeElapsedMs === undefined) {
-      return badRequest("playerName, answers, and timeElapsedMs are required");
-    }
-
-    const questions = await scanQuestions();
-    const questionsByNumber = new Map(
-      questions.map((q) => [String(q.qNumber), q])
-    );
+    const qResult = await client.send(new ScanCommand({ TableName: QUESTIONS_TABLE }));
+    const questions = (qResult.Items || []).map((i) => unmarshall(i));
 
     let score = 0;
-    for (const [qNum, answer] of Object.entries(body.answers)) {
-      const question = questionsByNumber.get(qNum);
-      if (question && question.correctAnswer === answer) {
+    for (const [qNum, answer] of Object.entries(answers as Record<string, string>)) {
+      const q = questions.find((question) => String(question.qNumber) === qNum);
+      if (q && q.correctAnswer === answer) {
         score++;
       }
     }
 
     const submission = {
-      submissionId: uuidv4(),
-      playerName: body.playerName,
+      submissionId: randomUUID(),
+      playerName,
       score,
-      timeElapsedMs: body.timeElapsedMs,
+      timeElapsedMs,
       submittedAt: new Date().toISOString(),
     };
 
-    await putSubmission(submission);
+    await client.send(
+      new PutCommand({
+        TableName: SUBMISSIONS_TABLE,
+        Item: marshall(submission),
+      })
+    );
 
-    const allSubmissions = await scanSubmissions();
-    const sorted = allSubmissions.sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return a.timeElapsedMs - b.timeElapsedMs;
+    const sResult = await client.send(new ScanCommand({ TableName: SUBMISSIONS_TABLE }));
+    const allSubs = (sResult.Items || []).map((i) => unmarshall(i));
+    allSubs.sort((a, b) => {
+      if (b.score !== a.score) return (b.score as number) - (a.score as number);
+      return (a.timeElapsedMs as number) - (b.timeElapsedMs as number);
     });
 
-    const rank =
-      sorted.findIndex((s) => s.submissionId === submission.submissionId) + 1;
+    const rank = allSubs.findIndex((s) => s.submissionId === submission.submissionId) + 1;
 
-    return success({
-      score,
-      totalQuestions: questions.length,
-      timeElapsedMs: body.timeElapsedMs,
-      rank,
-      totalPlayers: sorted.length,
-    });
+    return {
+      statusCode: 200,
+      headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+      body: JSON.stringify({
+        score,
+        totalQuestions: questions.length,
+        timeElapsedMs,
+        rank,
+        totalPlayers: allSubs.length,
+      }),
+    };
   } catch (error) {
-    console.error("Error submitting quiz:", error);
-    return serverError("Failed to submit quiz");
+    console.error("Error:", error);
+    return {
+      statusCode: 500,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ message: "Failed to submit quiz" }),
+    };
   }
 }

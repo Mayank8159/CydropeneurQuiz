@@ -1,60 +1,122 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { putQuestion } from "../lib/dynamo";
-import { success, created, badRequest, unauthorized, serverError } from "../lib/responses";
+import {
+  DynamoDBClient,
+  ScanCommand,
+  PutCommand,
+  DeleteCommand,
+} from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
+const client = new DynamoDBClient({});
+const TABLE = process.env.SST_RESOURCE_QuestionsTable!;
 const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || "";
 
-interface AdminQuestionBody {
-  qNumber: number;
-  question: string;
-  options: { a: string; b: string; c: string; d: string };
-  correctAnswer: string;
-}
-
-export async function handler(
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> {
+export async function handler(event: any) {
   try {
-    const authHeader =
-      event.headers?.["x-admin-passkey"] ||
-      event.headers?.["X-Admin-Passkey"];
+    const method = event.requestContext?.http?.method;
 
-    if (authHeader !== ADMIN_PASSKEY) {
-      return unauthorized("Admin clearance required");
+    // --- GET: list all questions ---
+    if (method === "GET") {
+      const result = await client.send(new ScanCommand({ TableName: TABLE }));
+      const items = (result.Items || []).map((i) => unmarshall(i));
+      items.sort((a, b) => (a.qNumber as number) - (b.qNumber as number));
+      return {
+        statusCode: 200,
+        headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+        body: JSON.stringify(items),
+      };
     }
 
-    if (!event.body) {
-      return badRequest("Request body is required");
+    // --- POST: create/update question ---
+    if (method === "POST") {
+      const authHeader = event.headers?.["x-admin-passkey"] || event.headers?.["X-Admin-Passkey"];
+      if (authHeader !== ADMIN_PASSKEY) {
+        return {
+          statusCode: 401,
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ message: "Admin clearance required" }),
+        };
+      }
+
+      const body = JSON.parse(event.body || "{}");
+      const { qNumber, question, options, correctAnswer } = body;
+
+      if (!qNumber || !question || !options || !correctAnswer) {
+        return {
+          statusCode: 400,
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ message: "All fields are required" }),
+        };
+      }
+
+      if (!["a", "b", "c", "d"].includes(correctAnswer)) {
+        return {
+          statusCode: 400,
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ message: "correctAnswer must be a, b, c, or d" }),
+        };
+      }
+
+      const qId = `Q_${qNumber}`;
+
+      await client.send(
+        new PutCommand({
+          TableName: TABLE,
+          Item: marshall({ qId, qNumber, question, options, correctAnswer }),
+        })
+      );
+
+      return {
+        statusCode: 201,
+        headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+        body: JSON.stringify({ success: true, qId }),
+      };
     }
 
-    const body: AdminQuestionBody = JSON.parse(event.body);
+    // --- DELETE: remove a question ---
+    if (method === "DELETE") {
+      const authHeader = event.headers?.["x-admin-passkey"] || event.headers?.["X-Admin-Passkey"];
+      if (authHeader !== ADMIN_PASSKEY) {
+        return {
+          statusCode: 401,
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ message: "Admin clearance required" }),
+        };
+      }
 
-    if (
-      !body.qNumber ||
-      !body.question ||
-      !body.options ||
-      !body.correctAnswer
-    ) {
-      return badRequest("All fields are required");
+      const qId = event.queryStringParameters?.qId;
+      if (!qId) {
+        return {
+          statusCode: 400,
+          headers: { "Access-Control-Allow-Origin": "*" },
+          body: JSON.stringify({ message: "qId query parameter is required" }),
+        };
+      }
+
+      await client.send(
+        new DeleteCommand({
+          TableName: TABLE,
+          Key: marshall({ qId }),
+        })
+      );
+
+      return {
+        statusCode: 200,
+        headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+        body: JSON.stringify({ success: true }),
+      };
     }
 
-    if (!["a", "b", "c", "d"].includes(body.correctAnswer)) {
-      return badRequest("correctAnswer must be a, b, c, or d");
-    }
-
-    const qId = `Q_${body.qNumber}`;
-
-    await putQuestion({
-      qId,
-      qNumber: body.qNumber,
-      question: body.question,
-      options: body.options,
-      correctAnswer: body.correctAnswer,
-    });
-
-    return created({ success: true, qId });
+    return {
+      statusCode: 405,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ message: "Method not allowed" }),
+    };
   } catch (error) {
-    console.error("Error creating question:", error);
-    return serverError("Failed to create question");
+    console.error("Error:", error);
+    return {
+      statusCode: 500,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ message: "Internal server error" }),
+    };
   }
 }

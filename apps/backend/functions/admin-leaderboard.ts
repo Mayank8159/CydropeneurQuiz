@@ -1,29 +1,41 @@
-import type { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { scanSubmissions } from "../lib/dynamo";
-import { success, serverError } from "../lib/responses";
+import {
+  DynamoDBClient,
+  ScanCommand,
+} from "@aws-sdk/client-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 
-export async function handler(
-  _event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> {
+const client = new DynamoDBClient({});
+const TABLE = process.env.SST_RESOURCE_SubmissionsTable!;
+
+export async function handler() {
   try {
-    const submissions = await scanSubmissions();
+    const result = await client.send(new ScanCommand({ TableName: TABLE }));
+    const items = (result.Items || []).map((i) => unmarshall(i));
 
-    const sorted = submissions
-      .sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return a.timeElapsedMs - b.timeElapsedMs;
-      })
-      .map((entry, index) => ({
-        rank: index + 1,
-        playerName: entry.playerName,
-        score: entry.score,
-        timeElapsedMs: entry.timeElapsedMs,
-        submittedAt: entry.submittedAt,
-      }));
+    items.sort((a, b) => {
+      if ((b.score as number) !== (a.score as number)) return (b.score as number) - (a.score as number);
+      return (a.timeElapsedMs as number) - (b.timeElapsedMs as number);
+    });
 
-    return success(sorted);
+    const leaderboard = items.map((entry, index) => ({
+      rank: index + 1,
+      playerName: entry.playerName,
+      score: entry.score,
+      timeElapsedMs: entry.timeElapsedMs,
+      submittedAt: entry.submittedAt,
+    }));
+
+    return {
+      statusCode: 200,
+      headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+      body: JSON.stringify(leaderboard),
+    };
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
-    return serverError("Failed to fetch leaderboard");
+    console.error("Error:", error);
+    return {
+      statusCode: 500,
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({ message: "Failed to fetch leaderboard" }),
+    };
   }
 }
