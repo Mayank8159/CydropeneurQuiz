@@ -1,0 +1,47 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/web/**"
+      - "packages/shared/**"
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
+jobs:
+  build-verify:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared package
+        run: pnpm build:shared
+
+      - name: Type-check web app
+        run: pnpm --filter @cydropeneur/web typecheck
+
+      - name: Build web app
+        run: pnpm build:web
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_EVENT_PASSKEY: ${{ secrets.NEXT_PUBLIC_EVENT_PASSKEY }}
+          NEXT_PUBLIC_ADMIN_PASSKEY: ${{ secrets.NEXT_PUBLIC_ADMIN_PASSKEY }}

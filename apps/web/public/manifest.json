@@ -1,0 +1,19 @@
+{
+  "name": "CYDROPENEUR | Cyberpunk Quiz Arena",
+  "short_name": "Cydropeneur",
+  "description": "Real-time cyberpunk quiz platform for college events",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#08090d",
+  "theme_color": "#00f3ff",
+  "orientation": "any",
+  "categories": ["education", "entertainment"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

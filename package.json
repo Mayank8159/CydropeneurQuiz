@@ -1,0 +1,12 @@
+{
+  "name": "cydropeneur-quiz",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter @cydropeneur/web dev",
+    "dev:backend": "cd apps/backend && sst dev",
+    "build:web": "pnpm --filter @cydropeneur/web build",
+    "build:shared": "pnpm --filter @cydropeneur/shared build",
+    "deploy:backend": "cd apps/backend && sst deploy",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
