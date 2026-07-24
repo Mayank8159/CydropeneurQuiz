@@ -28,6 +28,7 @@ export default function QuizPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [errorType, setErrorType] = useState<"server" | "empty" | "">("");
 
   const { elapsedMs, isRunning, start, stop } = useTimer();
 
@@ -43,10 +44,16 @@ export default function QuizPage() {
       .then((q) => {
         setQuestions(q);
         setLoading(false);
-        start();
+        if (q.length === 0) {
+          setError("NO QUESTIONS ADDED // AWAITING QUESTION DEPLOYMENT");
+          setErrorType("empty");
+        } else {
+          start();
+        }
       })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : "Failed to load questions");
+      .catch(() => {
+        setError("SERVER NOT CONNECTED // UNABLE TO REACH QUIZ MATRIX");
+        setErrorType("server");
         setLoading(false);
       });
   }, [router, start]);
@@ -98,11 +105,34 @@ export default function QuizPage() {
   }
 
   if (error && questions.length === 0) {
+    const isServer = errorType === "server";
     return (
       <div className="flex min-h-dvh items-center justify-center px-4">
-        <div className="text-center">
-          <p className="mb-4 font-display text-lg text-neon-pink">{error}</p>
-          <NeonButton onClick={() => router.push("/")} variant="ghost">
+        <div className="w-full max-w-sm space-y-6 text-center">
+          <div
+            className={`mx-auto flex h-20 w-20 items-center justify-center rounded-full border-2 ${
+              isServer
+                ? "border-neon-pink/40 bg-neon-pink/10"
+                : "border-muted-steel/30 bg-muted-steel/5"
+            }`}
+          >
+            <span className="font-display text-3xl font-bold text-muted-steel">
+              {isServer ? "!" : "?"}
+            </span>
+          </div>
+          <p
+            className={`font-display text-sm font-bold tracking-wider sm:text-base ${
+              isServer ? "text-neon-pink" : "text-muted-steel"
+            }`}
+          >
+            {error}
+          </p>
+          <p className="font-body text-xs text-muted-steel/70 sm:text-sm">
+            {isServer
+              ? "Check your connection and try again."
+              : "Ask the admin to deploy questions from the admin panel."}
+          </p>
+          <NeonButton onClick={() => router.push("/")} variant="ghost" size="sm">
             Return to Base
           </NeonButton>
         </div>

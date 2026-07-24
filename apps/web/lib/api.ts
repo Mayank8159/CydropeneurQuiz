@@ -66,6 +66,23 @@ export function adminCreateQuestion(payload: {
   );
 }
 
+export function adminFetchAllQuestions() {
+  return apiFetch<Array<{
+    qId: string;
+    qNumber: number;
+    question: string;
+    options: { a: string; b: string; c: string; d: string };
+    correctAnswer: string;
+  }>>("/api/admin/questions");
+}
+
+export function adminDeleteQuestion(qId: string) {
+  return apiFetch<{ success: boolean }>(
+    `/api/admin/questions?qId=${encodeURIComponent(qId)}`,
+    { method: "DELETE" }
+  );
+}
+
 export function fetchLeaderboard() {
   return apiFetch<Array<{
     rank: number;
