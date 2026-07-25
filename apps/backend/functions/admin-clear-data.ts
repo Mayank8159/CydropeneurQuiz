@@ -54,6 +54,18 @@ async function clearTable(tableName: string): Promise<number> {
 
 export async function handler(event: any) {
   try {
+    if (event.requestContext?.http?.method === "OPTIONS") {
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type,x-admin-passkey",
+        },
+        body: "",
+      };
+    }
+
     if (event.requestContext?.http?.method !== "POST") {
       return {
         statusCode: 405,

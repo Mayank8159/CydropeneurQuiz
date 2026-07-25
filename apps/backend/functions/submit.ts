@@ -12,6 +12,18 @@ const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE!;
 
 export async function handler(event: any) {
   try {
+    if (event.requestContext?.http?.method === "OPTIONS") {
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+        body: "",
+      };
+    }
+
     const body = JSON.parse(event.body || "{}");
     const { playerName, answers, timeElapsedMs } = body;
 

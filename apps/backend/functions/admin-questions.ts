@@ -14,6 +14,18 @@ export async function handler(event: any) {
   try {
     const method = event.requestContext?.http?.method;
 
+    if (method === "OPTIONS") {
+      return {
+        statusCode: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type,x-admin-passkey",
+        },
+        body: "",
+      };
+    }
+
     // --- GET: list all questions ---
     if (method === "GET") {
       const result = await client.send(new ScanCommand({ TableName: TABLE }));
