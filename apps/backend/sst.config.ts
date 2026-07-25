@@ -68,6 +68,14 @@ export default $config({
       },
     });
 
+    api.route("GET /api/check-player", {
+      handler: "functions/check-player.handler",
+      link: [submissionsTable],
+      environment: {
+        SUBMISSIONS_TABLE: submissionsTable.name,
+      },
+    });
+
     api.route("POST /api/admin/clear-data", {
       handler: "functions/admin-clear-data.handler",
       link: [questionsTable, submissionsTable],

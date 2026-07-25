@@ -109,6 +109,12 @@ export function fetchLeaderboard() {
   }>>("/api/admin/leaderboard");
 }
 
+export function checkPlayerName(name: string) {
+  return apiFetch<{ exists: boolean }>(
+    `/api/check-player?name=${encodeURIComponent(name)}`
+  );
+}
+
 export function adminClearData() {
   return apiFetch<{ success: boolean; questionsCleared: number; submissionsCleared: number }>(
     "/api/admin/clear-data",

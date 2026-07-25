@@ -8,6 +8,7 @@ import { NeonInput } from "@/components/ui/neon-input";
 import { NeonButton } from "@/components/ui/neon-button";
 import { CyberCard } from "@/components/ui/cyber-card";
 import { Shield, Zap } from "lucide-react";
+import { checkPlayerName } from "@/lib/api";
 
 const EVENT_PASSKEY = "Secure@123";
 
@@ -31,7 +32,20 @@ export default function Home() {
       return;
     }
 
-    sessionStorage.setItem("playerName", playerName);
+    try {
+      const { exists } = await checkPlayerName(playerName);
+      if (exists) {
+        setError("CALLSIGN TAKEN // ANOTHER OPERATIVE HAS THIS IDENTITY");
+        setLoading(false);
+        return;
+      }
+    } catch {
+      setError("SERVER NOT CONNECTED // UNABLE TO VERIFY IDENTITY");
+      setLoading(false);
+      return;
+    }
+
+    sessionStorage.setItem("playerName", playerName.trim().toLowerCase());
     router.push("/quiz");
   };
 
