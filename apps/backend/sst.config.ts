@@ -26,7 +26,13 @@ export default $config({
       primaryIndex: { hashKey: "submissionId" },
     });
 
-    const api = new sst.aws.ApiGatewayV2("QuizApi");
+    const api = new sst.aws.ApiGatewayV2("QuizApi", {
+      cors: {
+        allowOrigins: ["*"],
+        allowHeaders: ["Content-Type", "x-admin-passkey"],
+        allowMethods: ["GET", "POST", "DELETE", "OPTIONS"],
+      },
+    });
 
     api.route("GET /api/questions", {
       handler: "functions/questions.handler",
