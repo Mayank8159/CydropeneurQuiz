@@ -7,8 +7,8 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { randomUUID } from "crypto";
 
 const client = new DynamoDBClient({});
-const QUESTIONS_TABLE = JSON.parse(process.env.SST_RESOURCE_QuestionsTable || "{}").name;
-const SUBMISSIONS_TABLE = JSON.parse(process.env.SST_RESOURCE_SubmissionsTable || "{}").name;
+const QUESTIONS_TABLE = process.env.QUESTIONS_TABLE!;
+const SUBMISSIONS_TABLE = process.env.SUBMISSIONS_TABLE!;
 
 export async function handler(event: any) {
   try {

@@ -31,17 +31,25 @@ export default $config({
     api.route("GET /api/questions", {
       handler: "functions/questions.handler",
       bind: [questionsTable],
+      environment: {
+        QUESTIONS_TABLE: questionsTable.name,
+      },
     });
 
     api.route("POST /api/submit", {
       handler: "functions/submit.handler",
       bind: [questionsTable, submissionsTable],
+      environment: {
+        QUESTIONS_TABLE: questionsTable.name,
+        SUBMISSIONS_TABLE: submissionsTable.name,
+      },
     });
 
     api.route("ANY /api/admin/questions", {
       handler: "functions/admin-questions.handler",
       bind: [questionsTable],
       environment: {
+        QUESTIONS_TABLE: questionsTable.name,
         ADMIN_PASSKEY: process.env.ADMIN_PASSKEY || "",
       },
     });
@@ -49,6 +57,9 @@ export default $config({
     api.route("GET /api/admin/leaderboard", {
       handler: "functions/admin-leaderboard.handler",
       bind: [submissionsTable],
+      environment: {
+        SUBMISSIONS_TABLE: submissionsTable.name,
+      },
     });
 
     return {

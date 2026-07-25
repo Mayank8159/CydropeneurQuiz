@@ -5,10 +5,7 @@ import {
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 const client = new DynamoDBClient({});
-const rawTable = process.env.SST_RESOURCE_QuestionsTable;
-console.log("SST_RESOURCE_QuestionsTable raw:", rawTable);
-const TABLE = rawTable ? JSON.parse(rawTable).name : undefined;
-console.log("Parsed TABLE:", TABLE);
+const TABLE = process.env.QUESTIONS_TABLE!;
 
 export async function handler() {
   try {
