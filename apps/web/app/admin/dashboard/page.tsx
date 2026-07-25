@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "motion/react";
 import { GlitchText } from "@/components/ui/glitch-text";
 import { CyberCard } from "@/components/ui/cyber-card";
 import { NeonButton } from "@/components/ui/neon-button";
@@ -14,7 +15,21 @@ import {
   adminDeleteQuestion,
   adminClearData,
 } from "@/lib/api";
-import { RefreshCw, Database, BarChart3, List, Trash2 } from "lucide-react";
+import {
+  RefreshCw,
+  Database,
+  BarChart3,
+  List,
+  Trash2,
+  Info,
+  X,
+  FilePlus,
+  LayoutList,
+  Trophy,
+  AlertTriangle,
+  KeyRound,
+  CheckCircle,
+} from "lucide-react";
 
 interface AdminQuestion {
   qId: string;
@@ -41,6 +56,7 @@ export default function AdminDashboardPage() {
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
   const [clearingData, setClearingData] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
     const auth = sessionStorage.getItem("adminAuth");
@@ -118,16 +134,28 @@ export default function AdminDashboardPage() {
             as="h1"
             className="text-xl font-bold tracking-wider text-neon-pink text-glow-pink sm:text-2xl"
           />
-          <NeonButton
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              sessionStorage.removeItem("adminAuth");
-              router.push("/admin");
-            }}
-          >
-            Logout
-          </NeonButton>
+          <div className="flex items-center gap-2">
+            <NeonButton
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowGuide(true)}
+            >
+              <span className="flex items-center gap-1">
+                <Info size={14} />
+                Guide
+              </span>
+            </NeonButton>
+            <NeonButton
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                sessionStorage.removeItem("adminAuth");
+                router.push("/admin");
+              }}
+            >
+              Logout
+            </NeonButton>
+          </div>
         </div>
 
         {/* Question Form Section */}
@@ -240,6 +268,98 @@ export default function AdminDashboardPage() {
             </div>
           )}
         </CyberCard>
+      </div>
+
+      {/* Guide Modal */}
+      <AnimatePresence>
+        {showGuide && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm"
+            onClick={() => setShowGuide(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+              className="glass glow-pink w-full max-w-lg rounded-lg border border-neon-pink/30 p-6"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-neon-pink">
+                  <Info size={20} />
+                  <h2 className="font-display text-sm font-bold uppercase tracking-widest">
+                    Admin Guide
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setShowGuide(false)}
+                  className="text-muted-steel transition-colors hover:text-ice-white"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="space-y-4 text-sm text-muted-steel">
+                <GuideItem
+                  icon={<KeyRound size={14} className="text-neon-cyan" />}
+                  title="Admin Login"
+                  desc="Enter the admin passkey to access this dashboard. Only authorized personnel can manage the quiz."
+                />
+                <GuideItem
+                  icon={<FilePlus size={14} className="text-neon-cyan" />}
+                  title="Question Deployer"
+                  desc="Create new quiz questions. Enter the question text, four options (A-D), and select the correct answer. Click Deploy to save."
+                />
+                <GuideItem
+                  icon={<LayoutList size={14} className="text-neon-cyan" />}
+                  title="Deployed Questions"
+                  desc="View all active questions. Click the expand arrow to see options and correct answer. Use the trash icon to delete a question."
+                />
+                <GuideItem
+                  icon={<Trophy size={14} className="text-neon-cyan" />}
+                  title="Live Leaderboard"
+                  desc="See all player submissions ranked by score and speed. Top scores appear first. Time is used as a tiebreaker."
+                />
+                <GuideItem
+                  icon={<AlertTriangle size={14} className="text-neon-pink" />}
+                  title="Danger Zone"
+                  desc="Permanently deletes ALL questions and leaderboard entries from the database. This action cannot be undone."
+                />
+                <GuideItem
+                  icon={<CheckCircle size={14} className="text-green-400" />}
+                  title="Tips"
+                  desc="Use Refresh buttons to fetch latest data. Names are locked — no two players can use the same callsign. Questions support any language."
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+function GuideItem({
+  icon,
+  title,
+  desc,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="flex gap-3 rounded-md border border-muted-steel/10 bg-white/[0.02] p-3">
+      <div className="mt-0.5 shrink-0">{icon}</div>
+      <div>
+        <p className="mb-1 font-display text-xs font-bold uppercase tracking-wider text-ice-white">
+          {title}
+        </p>
+        <p className="text-xs leading-relaxed text-muted-steel/80">{desc}</p>
       </div>
     </div>
   );
