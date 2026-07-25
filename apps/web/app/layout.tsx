@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Orbitron, Rajdhani } from "next/font/google";
 import { ScanlineOverlay } from "@/components/ui/scanline-overlay";
+import { PwaInstallPrompt } from "@/components/ui/pwa-install-prompt";
 import "./globals.css";
 
 const orbitron = Orbitron({
@@ -58,6 +59,7 @@ export default function RootLayout({
         className={`${orbitron.variable} ${rajdhani.variable} bg-cyber-bg text-ice-white min-h-dvh font-body antialiased`}
       >
         <ScanlineOverlay />
+        <PwaInstallPrompt />
         {children}
         <script
           dangerouslySetInnerHTML={{
