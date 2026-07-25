@@ -1,5 +1,10 @@
 "use client";
 
+function getAdminPasskey(): string {
+  if (typeof window === "undefined") return "";
+  return sessionStorage.getItem("adminAuth") || "";
+}
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
 interface ApiOptions {
@@ -66,7 +71,7 @@ export function adminCreateQuestion(payload: {
       method: "POST",
       body: payload,
       headers: {
-        "x-admin-passkey": process.env.NEXT_PUBLIC_ADMIN_PASSKEY || "",
+        "x-admin-passkey": getAdminPasskey(),
       },
     }
   );
@@ -88,7 +93,7 @@ export function adminDeleteQuestion(qId: string) {
     {
       method: "DELETE",
       headers: {
-        "x-admin-passkey": process.env.NEXT_PUBLIC_ADMIN_PASSKEY || "",
+        "x-admin-passkey": getAdminPasskey(),
       },
     }
   );
@@ -110,7 +115,7 @@ export function adminClearData() {
     {
       method: "POST",
       headers: {
-        "x-admin-passkey": process.env.NEXT_PUBLIC_ADMIN_PASSKEY || "",
+        "x-admin-passkey": getAdminPasskey(),
       },
     }
   );

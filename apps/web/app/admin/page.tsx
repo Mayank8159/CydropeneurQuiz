@@ -30,7 +30,7 @@ export default function AdminPage() {
       return;
     }
 
-    sessionStorage.setItem("adminAuth", "true");
+    sessionStorage.setItem("adminAuth", passkey);
     router.push("/admin/dashboard");
   };
 
