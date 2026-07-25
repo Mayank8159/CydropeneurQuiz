@@ -7,7 +7,7 @@ import {
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 const client = new DynamoDBClient({});
-const TABLE = JSON.parse(process.env.SST_RESOURCE_QuestionsTable || "{}").name;
+const TABLE = process.env.QUESTIONS_TABLE!;
 const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || "";
 
 export async function handler(event: any) {
