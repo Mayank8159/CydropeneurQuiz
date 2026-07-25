@@ -1,14 +1,14 @@
 import {
   DynamoDBClient,
   ScanCommand,
-  PutCommand,
+  PutItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { randomUUID } from "crypto";
 
 const client = new DynamoDBClient({});
-const QUESTIONS_TABLE = process.env.SST_RESOURCE_QuestionsTable!;
-const SUBMISSIONS_TABLE = process.env.SST_RESOURCE_SubmissionsTable!;
+const QUESTIONS_TABLE = JSON.parse(process.env.SST_RESOURCE_QuestionsTable || "{}").name;
+const SUBMISSIONS_TABLE = JSON.parse(process.env.SST_RESOURCE_SubmissionsTable || "{}").name;
 
 export async function handler(event: any) {
   try {
@@ -43,7 +43,7 @@ export async function handler(event: any) {
     };
 
     await client.send(
-      new PutCommand({
+      new PutItemCommand({
         TableName: SUBMISSIONS_TABLE,
         Item: marshall(submission),
       })

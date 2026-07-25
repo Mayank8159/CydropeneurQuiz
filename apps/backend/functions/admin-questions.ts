@@ -1,13 +1,13 @@
 import {
   DynamoDBClient,
   ScanCommand,
-  PutCommand,
-  DeleteCommand,
+  PutItemCommand,
+  DeleteItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 
 const client = new DynamoDBClient({});
-const TABLE = process.env.SST_RESOURCE_QuestionsTable!;
+const TABLE = JSON.parse(process.env.SST_RESOURCE_QuestionsTable || "{}").name;
 const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || "";
 
 export async function handler(event: any) {
@@ -59,7 +59,7 @@ export async function handler(event: any) {
       const qId = `Q_${qNumber}`;
 
       await client.send(
-        new PutCommand({
+        new PutItemCommand({
           TableName: TABLE,
           Item: marshall({ qId, qNumber, question, options, correctAnswer }),
         })
@@ -93,7 +93,7 @@ export async function handler(event: any) {
       }
 
       await client.send(
-        new DeleteCommand({
+        new DeleteItemCommand({
           TableName: TABLE,
           Key: marshall({ qId }),
         })

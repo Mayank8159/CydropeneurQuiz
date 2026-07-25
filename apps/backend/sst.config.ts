@@ -28,17 +28,17 @@ export default $config({
 
     const api = new sst.aws.ApiGatewayV2("QuizApi");
 
-    api.route("GET /questions", {
+    api.route("GET /api/questions", {
       handler: "functions/questions.handler",
       bind: [questionsTable],
     });
 
-    api.route("POST /submit", {
+    api.route("POST /api/submit", {
       handler: "functions/submit.handler",
       bind: [questionsTable, submissionsTable],
     });
 
-    api.route("ANY /admin/questions", {
+    api.route("ANY /api/admin/questions", {
       handler: "functions/admin-questions.handler",
       bind: [questionsTable],
       environment: {
@@ -46,7 +46,7 @@ export default $config({
       },
     });
 
-    api.route("GET /admin/leaderboard", {
+    api.route("GET /api/admin/leaderboard", {
       handler: "functions/admin-leaderboard.handler",
       bind: [submissionsTable],
     });
