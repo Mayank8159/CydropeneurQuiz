@@ -62,7 +62,13 @@ export function adminCreateQuestion(payload: {
 }) {
   return apiFetch<{ success: boolean; qId: string }>(
     "/api/admin/questions",
-    { method: "POST", body: payload }
+    {
+      method: "POST",
+      body: payload,
+      headers: {
+        "x-admin-passkey": process.env.NEXT_PUBLIC_ADMIN_PASSKEY || "",
+      },
+    }
   );
 }
 
@@ -79,7 +85,12 @@ export function adminFetchAllQuestions() {
 export function adminDeleteQuestion(qId: string) {
   return apiFetch<{ success: boolean }>(
     `/api/admin/questions?qId=${encodeURIComponent(qId)}`,
-    { method: "DELETE" }
+    {
+      method: "DELETE",
+      headers: {
+        "x-admin-passkey": process.env.NEXT_PUBLIC_ADMIN_PASSKEY || "",
+      },
+    }
   );
 }
 
