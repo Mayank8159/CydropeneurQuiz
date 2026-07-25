@@ -62,6 +62,16 @@ export default $config({
       },
     });
 
+    api.route("POST /api/admin/clear-data", {
+      handler: "functions/admin-clear-data.handler",
+      link: [questionsTable, submissionsTable],
+      environment: {
+        QUESTIONS_TABLE: questionsTable.name,
+        SUBMISSIONS_TABLE: submissionsTable.name,
+        ADMIN_PASSKEY: process.env.ADMIN_PASSKEY || "",
+      },
+    });
+
     return {
       ApiEndpoint: api.url,
     };

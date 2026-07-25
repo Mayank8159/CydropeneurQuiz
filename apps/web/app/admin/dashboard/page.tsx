@@ -12,8 +12,9 @@ import {
   fetchLeaderboard,
   adminFetchAllQuestions,
   adminDeleteQuestion,
+  adminClearData,
 } from "@/lib/api";
-import { RefreshCw, Database, BarChart3, List } from "lucide-react";
+import { RefreshCw, Database, BarChart3, List, Trash2 } from "lucide-react";
 
 interface AdminQuestion {
   qId: string;
@@ -38,6 +39,8 @@ export default function AdminDashboardPage() {
     }>
   >([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+  const [clearingData, setClearingData] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   useEffect(() => {
     const auth = sessionStorage.getItem("adminAuth");
@@ -92,6 +95,19 @@ export default function AdminDashboardPage() {
     loadQuestions();
     loadLeaderboard();
   }, [loadQuestions, loadLeaderboard]);
+
+  const handleClearData = useCallback(async () => {
+    setClearingData(true);
+    try {
+      await adminClearData();
+      setQuestions([]);
+      setLeaderboard([]);
+      setShowClearConfirm(false);
+    } catch {
+    } finally {
+      setClearingData(false);
+    }
+  }, []);
 
   return (
     <div className="min-h-dvh px-3 py-6 sm:px-4 sm:py-8">
@@ -175,6 +191,54 @@ export default function AdminDashboardPage() {
             </NeonButton>
           </div>
           <LeaderboardTable entries={leaderboard} />
+        </CyberCard>
+
+        {/* Danger Zone */}
+        <CyberCard glow="pink">
+          <div className="mb-4 flex items-center gap-2 text-red-400 sm:mb-6">
+            <Trash2 size={18} />
+            <h2 className="font-display text-xs uppercase tracking-widest sm:text-sm">
+              Danger Zone
+            </h2>
+          </div>
+          <p className="mb-4 text-xs text-white/50">
+            This will permanently delete all questions and leaderboard entries from the database.
+          </p>
+          {!showClearConfirm ? (
+            <NeonButton
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowClearConfirm(true)}
+            >
+              <span className="flex items-center gap-1 text-red-400">
+                <Trash2 size={14} />
+                Clear All Data
+              </span>
+            </NeonButton>
+          ) : (
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <p className="text-xs font-bold text-red-400">
+                Are you sure? This cannot be undone.
+              </p>
+              <div className="flex gap-2">
+                <NeonButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearData}
+                  loading={clearingData}
+                >
+                  <span className="text-red-400">Yes, delete everything</span>
+                </NeonButton>
+                <NeonButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowClearConfirm(false)}
+                >
+                  Cancel
+                </NeonButton>
+              </div>
+            </div>
+          )}
         </CyberCard>
       </div>
     </div>

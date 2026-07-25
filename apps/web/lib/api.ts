@@ -92,3 +92,15 @@ export function fetchLeaderboard() {
     submittedAt: string;
   }>>("/api/admin/leaderboard");
 }
+
+export function adminClearData() {
+  return apiFetch<{ success: boolean; questionsCleared: number; submissionsCleared: number }>(
+    "/api/admin/clear-data",
+    {
+      method: "POST",
+      headers: {
+        "x-admin-passkey": process.env.NEXT_PUBLIC_ADMIN_PASSKEY || "",
+      },
+    }
+  );
+}
