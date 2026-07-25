@@ -14,8 +14,8 @@ function formatTime(ms: number): string {
   const totalSeconds = Math.floor(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  const milliseconds = Math.floor((ms % 1000) / 10);
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(2, "0")}`;
+  const milliseconds = Math.floor(ms % 1000);
+  return `${minutes} mins: ${seconds} secs: ${milliseconds} millisecs`;
 }
 
 function formatTimestamp(iso: string): string {
