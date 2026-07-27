@@ -36,10 +36,10 @@ export function QuestionCard({
       <div className="mb-1.5 font-display text-[10px] uppercase tracking-[0.2em] text-neon-cyan sm:mb-2 sm:text-xs">
         Question {qNumber}
       </div>
-      <h2 className="mb-5 text-lg font-semibold leading-relaxed text-ice-white sm:mb-8 sm:font-display sm:text-xl md:text-2xl">
+      <h2 className="mb-3.5 text-base font-semibold leading-relaxed text-ice-white sm:mb-4 sm:font-display sm:text-lg md:text-xl">
         {question}
       </h2>
-      <div className="flex flex-col gap-2.5 sm:gap-3">
+      <div className="flex flex-col gap-2 sm:gap-2.5">
         {letters.map((letter) => (
           <OptionButton
             key={letter}

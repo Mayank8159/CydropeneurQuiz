@@ -42,6 +42,6 @@ jobs:
       - name: Build web app
         run: pnpm build:web
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_EVENT_PASSKEY: ${{ secrets.NEXT_PUBLIC_EVENT_PASSKEY }}
-          NEXT_PUBLIC_ADMIN_PASSKEY: ${{ secrets.NEXT_PUBLIC_ADMIN_PASSKEY }}
+          NEXT_PUBLIC_API_URL: "${{ secrets.NEXT_PUBLIC_API_URL }}"
+          NEXT_PUBLIC_EVENT_PASSKEY: "${{ secrets.NEXT_PUBLIC_EVENT_PASSKEY }}"
+          NEXT_PUBLIC_ADMIN_PASSKEY: "${{ secrets.NEXT_PUBLIC_ADMIN_PASSKEY }}"
