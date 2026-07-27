@@ -29,10 +29,10 @@ export function OptionButton({
       disabled={disabled}
       className={`
         w-full text-left rounded-lg border-2 p-3
-        transition-all duration-300 font-body text-base
+        transition-all duration-300 font-sans text-base
         flex items-center gap-3
         disabled:cursor-not-allowed disabled:opacity-50
-        sm:p-4 sm:gap-4 sm:text-lg
+        sm:p-4 sm:gap-4 sm:text-base
         ${
           selected
             ? "border-neon-cyan bg-neon-cyan/10 text-neon-cyan shadow-[0_0_15px_rgba(0,243,255,0.3)]"

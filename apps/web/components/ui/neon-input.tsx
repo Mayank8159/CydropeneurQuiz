@@ -5,14 +5,15 @@ import { forwardRef, type InputHTMLAttributes } from "react";
 interface NeonInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  labelClassName?: string;
 }
 
 export const NeonInput = forwardRef<HTMLInputElement, NeonInputProps>(
-  ({ label, error, className = "", ...props }, ref) => {
+  ({ label, error, labelClassName = "", className = "", ...props }, ref) => {
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label className="font-display text-xs uppercase tracking-widest text-muted-steel">
+          <label className={`font-display text-xs uppercase tracking-normal text-muted-steel ${labelClassName}`}>
             {label}
           </label>
         )}

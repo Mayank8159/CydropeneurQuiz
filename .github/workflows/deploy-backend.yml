@@ -36,12 +36,12 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+          aws-secret-access-key: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
           aws-region: ap-south-1
 
       - name: Deploy with SST
         run: pnpm deploy:backend
         env:
-          SST_ACCESS_KEY: ${{ secrets.SST_ACCESS_KEY }}
-          ADMIN_PASSKEY: ${{ secrets.ADMIN_PASSKEY }}
+          SST_ACCESS_KEY: "${{ secrets.SST_ACCESS_KEY }}"
+          ADMIN_PASSKEY: "${{ secrets.ADMIN_PASSKEY }}"

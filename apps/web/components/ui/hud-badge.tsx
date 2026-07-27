@@ -32,16 +32,16 @@ export function HudBadge({
     <div
       className={`
         ${styles.bg} ${styles.border} border
-        rounded-md px-4 py-2
-        flex flex-col items-center gap-0.5
-        font-display
+        rounded-md px-3 py-1
+        flex items-center gap-2
+        font-display text-xs
         ${className}
       `}
     >
-      <span className="text-[10px] uppercase tracking-widest text-muted-steel">
-        {label}
+      <span className="text-[9px] uppercase tracking-widest text-muted-steel">
+        {label}:
       </span>
-      <span className={`text-lg font-bold ${styles.text}`}>{value}</span>
+      <span className={`font-bold ${styles.text}`}>{value}</span>
     </div>
   );
 }

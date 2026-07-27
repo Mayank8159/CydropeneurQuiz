@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Ethnocentric';
+  src: url('/fonts/Ethnocentric-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-cyber-bg: #08090d;
   --color-cyber-surface: #12141d;
@@ -11,8 +19,8 @@
   --color-ice-white: #e0f7fc;
   --color-muted-steel: #708090;
 
-  --font-family-display: "Orbitron", sans-serif;
-  --font-family-body: "Rajdhani", sans-serif;
+  --font-family-display: "Ethnocentric", sans-serif;
+  --font-family-body: "Ethnocentric", sans-serif;
 
   --animate-scanline: scanline 8s linear infinite;
   --animate-glow-pulse: glow-pulse 2s ease-in-out infinite;
@@ -49,6 +57,17 @@
     background-color: var(--color-cyber-bg);
     color: var(--color-ice-white);
     font-family: var(--font-family-body);
+    background-image: url('/phone--main%20bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  @media (min-width: 768px) {
+    html {
+      background-image: url('/main-bg.png');
+    }
   }
 
   body {
@@ -56,6 +75,26 @@
     min-height: 100vh;
     overflow-x: hidden;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  .quiz-page-bg {
+    background: rgba(0, 0, 0, 0.82) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+  }
+
+  @media (min-width: 1024px) {
+    .quiz-layout-locked {
+      overflow: hidden !important;
+      height: 100vh;
+      height: 100dvh;
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .quiz-layout-locked {
+      overflow-y: auto !important;
+    }
   }
 
   * {

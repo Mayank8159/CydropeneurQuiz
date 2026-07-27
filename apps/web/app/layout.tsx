@@ -1,20 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Orbitron, Rajdhani } from "next/font/google";
 import { ScanlineOverlay } from "@/components/ui/scanline-overlay";
 import { PwaInstallPrompt } from "@/components/ui/pwa-install-prompt";
 import "./globals.css";
-
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  variable: "--font-orbitron",
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-const rajdhani = Rajdhani({
-  subsets: ["latin"],
-  variable: "--font-rajdhani",
-  weight: ["300", "400", "500", "600", "700"],
-});
 
 export const metadata: Metadata = {
   title: "CYDROPENEUR | Cyberpunk Quiz Arena",
@@ -56,7 +43,7 @@ export default function RootLayout({
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body
-        className={`${orbitron.variable} ${rajdhani.variable} bg-cyber-bg text-ice-white min-h-dvh font-body antialiased`}
+        className="text-ice-white min-h-dvh font-body antialiased"
       >
         <ScanlineOverlay />
         <PwaInstallPrompt />
