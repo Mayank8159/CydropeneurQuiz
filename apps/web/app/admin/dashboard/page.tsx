@@ -286,9 +286,9 @@ export default function AdminDashboardPage() {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="glass glow-pink w-full max-w-lg rounded-lg border border-white/30 bg-white/[0.12] p-6 backdrop-blur-2xl"
+              className="glass glow-pink mx-auto max-h-[90dvh] w-[95%] max-w-lg overflow-y-auto rounded-lg border border-white/30 bg-white/[0.12] p-4 backdrop-blur-2xl sm:p-6"
             >
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between sm:mb-4">
                 <div className="flex items-center gap-2 text-neon-pink">
                   <Info size={20} />
                   <h2 className="font-display text-sm font-bold uppercase tracking-widest">
@@ -303,7 +303,7 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
 
-              <div className="space-y-4 text-sm text-muted-steel">
+              <div className="space-y-3 text-sm text-muted-steel sm:space-y-4">
                 <GuideItem
                   icon={<KeyRound size={14} className="text-neon-cyan" />}
                   title="Admin Login"
@@ -353,13 +353,13 @@ function GuideItem({
   desc: string;
 }) {
   return (
-    <div className="flex gap-3 rounded-md border border-muted-steel/10 bg-white/[0.02] p-3">
+    <div className="flex gap-2 rounded-md border border-muted-steel/10 bg-white/[0.02] p-2 sm:gap-3 sm:p-3">
       <div className="mt-0.5 shrink-0">{icon}</div>
-      <div>
-        <p className="mb-1 font-display text-xs font-bold uppercase tracking-wider text-ice-white">
+      <div className="min-w-0">
+        <p className="mb-0.5 font-display text-[11px] font-bold uppercase tracking-wider text-ice-white sm:mb-1 sm:text-xs">
           {title}
         </p>
-        <p className="text-xs leading-relaxed text-muted-steel/80">{desc}</p>
+        <p className="text-[11px] leading-relaxed text-muted-steel/80 sm:text-xs">{desc}</p>
       </div>
     </div>
   );
