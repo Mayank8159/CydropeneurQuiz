@@ -1,6 +1,5 @@
-const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || "Admin@15";
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@cydropreneur.com";
+const ADMIN_PASSKEY = process.env.ADMIN_PASSKEY || "";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
 
 /**
  * Performs constant-time comparison to prevent timing attacks.
@@ -65,9 +64,12 @@ export async function handler(event: any) {
 
     const normalized = String(username).trim().toLowerCase();
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$/;
-    const envEmail = String(ADMIN_EMAIL).trim().toLowerCase();
+    const allowedEmails = String(ADMIN_EMAIL)
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
 
-    const isDefaultUser = emailRegex.test(normalized) && (normalized === "admin@cydropreneur.com" || normalized === "admin@gmail.com" || normalized === envEmail);
+    const isDefaultUser = emailRegex.test(normalized) && allowedEmails.includes(normalized);
     const isPasskeyValid = timingSafeEqualString(passkey, ADMIN_PASSKEY);
 
     if (!isDefaultUser || !isPasskeyValid) {

@@ -1,5 +1,5 @@
 {
-  "name": "CYDROPRENEUR | Cyberpunk Quiz Arena",
+  "name": "CYDROPRENEUR | Quiz Arena",
   "short_name": "Cydropreneur",
   "description": "Real-time cyberpunk quiz platform for college events",
   "start_url": "/",
@@ -7,7 +7,10 @@
   "background_color": "#08090d",
   "theme_color": "#00f3ff",
   "orientation": "any",
-  "categories": ["education", "entertainment"],
+  "categories": [
+    "education",
+    "entertainment"
+  ],
   "icons": [
     {
       "src": "/icon.svg",

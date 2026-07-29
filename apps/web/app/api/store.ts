@@ -29,11 +29,6 @@ export interface AdminUser {
   passkey: string;
 }
 
-const adminUsers: Map<string, AdminUser> = new Map([
-  ["admin@cydropreneur.com", { username: "admin@cydropreneur.com", passkey: process.env.ADMIN_PASSKEY || "Admin@15" }],
-  ["admin@gmail.com", { username: "admin@gmail.com", passkey: process.env.ADMIN_PASSKEY || "Admin@15" }],
-]);
-
 /**
  * Performs constant-time comparison to prevent timing attacks.
  */
@@ -61,28 +56,48 @@ function isSecurityViolation(input: unknown): boolean {
   return dangerousRegex.test(input);
 }
 
+// Admin verification uses environment variables without hardcoded email strings in source.
+// Production and local paths are strictly mutually exclusive via NODE_ENV.
 export function verifyAdminUser(username: string, passkey: string): boolean {
   if (isSecurityViolation(username) || typeof passkey !== "string" || passkey.length < 3 || passkey.length > 100) {
     return false;
   }
 
   const normalized = username.trim().toLowerCase();
-  // Must be an email address
+  // Must be a valid email address
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$/;
   if (!emailRegex.test(normalized)) {
     return false;
   }
 
-  const envEmail = (process.env.ADMIN_EMAIL || "admin@cydropreneur.com").trim().toLowerCase();
-  const envPasskey = process.env.ADMIN_PASSKEY || "Admin@15";
+  const isDev = process.env.NODE_ENV === "development";
 
-  // Check env email admin if set
-  if (envEmail && normalized === envEmail) {
-    return timingSafeEqualString(passkey, envPasskey);
+  // ── PRODUCTION PATH ──────────────────────────────────────────────────────────
+  // Only runs in production (NODE_ENV !== "development").
+  // Reads ADMIN_EMAIL / ADMIN_PASSKEY — these are blanked in .env.local so they
+  // can never be used locally, even if .env still defines them.
+  if (!isDev) {
+    const envEmails = (process.env.ADMIN_EMAIL || "")
+      .split(",")
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const envPasskey = process.env.ADMIN_PASSKEY || "";
+    if (envEmails.length > 0 && envEmails.includes(normalized) && envPasskey) {
+      return timingSafeEqualString(passkey, envPasskey);
+    }
+    return false; // Hard-stop: no dev fallback in production
   }
 
-  // Check store / database admin user
-  const user = adminUsers.get(normalized);
-  if (!user) return false;
-  return timingSafeEqualString(passkey, user.passkey);
+  // ── LOCAL DEV PATH ───────────────────────────────────────────────────────────
+  // Only runs when NODE_ENV=development.
+  // Reads NEXT_PUBLIC_DEV_ADMIN_* from .env.local (gitignored).
+  // Production ADMIN_EMAIL / ADMIN_PASSKEY are blanked in .env.local so they
+  // cannot be used here either.
+  const devEmail = (process.env.NEXT_PUBLIC_DEV_ADMIN_EMAIL || "").trim().toLowerCase();
+  const devpassKey = process.env.NEXT_PUBLIC_DEV_ADMIN_PASSKEY || "";
+  if (devEmail && devpassKey && normalized === devEmail) {
+    return timingSafeEqualString(passkey, devpassKey);
+  }
+
+  return false;
 }

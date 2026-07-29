@@ -89,7 +89,7 @@ export default $config({
     api.route("POST /api/admin/login", {
       handler: "functions/admin-login.handler",
       environment: {
-        ADMIN_USERNAME: process.env.ADMIN_USERNAME || "admin",
+        ADMIN_EMAIL: process.env.ADMIN_EMAIL || "",
         ADMIN_PASSKEY: process.env.ADMIN_PASSKEY || "",
       },
     });

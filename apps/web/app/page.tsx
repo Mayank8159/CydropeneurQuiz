@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { NeonInput } from "@/components/ui/neon-input";
 import { checkPlayerName } from "@/lib/api";
 
-const EVENT_PASSKEY = "Secure@123";
+const EVENT_PASSKEY = process.env.NEXT_PUBLIC_EVENT_PASSKEY || "";
 
 export default function Home() {
   const router = useRouter();

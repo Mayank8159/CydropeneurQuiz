@@ -57,9 +57,9 @@ export default function AdminPage() {
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4 sm:gap-5">
             <NeonInput
-              label="Admin Email"
+              label="Admin Username"
               type="text"
-              placeholder="Enter admin email..."
+              placeholder="Enter admin username..."
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

@@ -4,7 +4,7 @@ import { PwaInstallPrompt } from "@/components/ui/pwa-install-prompt";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "CYDROPRENEUR | Cyberpunk Quiz Arena",
+  title: "CYDROPRENEUR | Quiz Arena",
   description: "Real-time cyberpunk quiz platform for college events",
   manifest: "/manifest.json",
   appleWebApp: {
