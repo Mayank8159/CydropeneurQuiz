@@ -1,49 +1,72 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { NeonInput } from "@/components/ui/neon-input";
-
-const ADMIN_PASSKEY = "Admin@15";
+import { adminLogin } from "@/lib/api";
 
 export default function AdminPage() {
   const router = useRouter();
+  const [username, setUsername] = useState("");
   const [passkey, setPasskey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => {
+      setError("");
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [error]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    await new Promise((r) => setTimeout(r, 600));
-
-    if (passkey !== ADMIN_PASSKEY) {
-      setError("ACCESS DENIED // ADMIN CLEARANCE REQUIRED");
+    try {
+      const res = await adminLogin({ username, passkey });
+      if (res.success) {
+        sessionStorage.setItem("adminAuth", passkey);
+        sessionStorage.setItem("adminUsername", res.username || username);
+        router.push("/admin/dashboard");
+      } else {
+        setError(res.message || "ACCESS DENIED // ADMIN CLEARANCE REQUIRED");
+        setLoading(false);
+      }
+    } catch (err: any) {
+      setError(err?.message || "ACCESS DENIED // INVALID CREDENTIALS OR DB CHECK FAILED");
       setLoading(false);
-      return;
     }
-
-    sessionStorage.setItem("adminAuth", passkey);
-    router.push("/admin/dashboard");
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[400px] space-y-6 translate-y-[18vh] sm:translate-y-[22vh] md:translate-y-[26vh]">
+    <div className="flex min-h-dvh items-center md:items-start justify-center px-4 py-6 sm:py-10">
+      <div className="w-full max-w-[400px] space-y-6 my-auto md:my-0 md:mt-[44vh] lg:mt-[48vh] xl:mt-[50vh] pb-8">
 
         {/* Glassmorphism Card Container */}
         <div
-          className="flex flex-col w-full rounded-2xl p-5 sm:p-6 shadow-2xl border-2 border-white/20 text-white bg-black/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] justify-center"
+          className="flex flex-col w-full rounded-2xl p-5 sm:p-6 shadow-2xl border-2 border-white/30 text-white bg-white/[0.12] backdrop-blur-2xl shadow-[0_0_40px_rgba(255,255,255,0.12)] justify-center"
         >
           {/* Title */}
           <h2 className="text-base sm:text-lg text-center font-display font-normal tracking-wide uppercase text-white mb-6">
             ADMIN TERMINAL
           </h2>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-5">
+          <form onSubmit={handleLogin} className="flex flex-col gap-4 sm:gap-5">
+            <NeonInput
+              label="Admin Username"
+              type="text"
+              placeholder="Enter admin username..."
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
+              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"
+            />
+
             <NeonInput
               label="Admin Passkey"
               type="password"
@@ -51,8 +74,8 @@ export default function AdminPage() {
               value={passkey}
               onChange={(e) => setPasskey(e.target.value)}
               required
-              labelClassName="text-white/80 font-normal text-[10px] tracking-normal"
-              className="bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.15)] text-sm"
+              labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
+              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"
             />
 
             <AnimatePresence>
@@ -90,10 +113,10 @@ export default function AdminPage() {
         </div>
 
         {/* Footer Link */}
-        <div className="text-center">
+        <div className="text-center mt-2">
           <a
             href="/"
-            className="font-display text-xs uppercase tracking-normal text-white/40 transition-colors hover:text-white"
+            className="inline-block rounded-full bg-black/80 border border-white/50 px-5 py-2.5 font-display text-xs font-bold uppercase tracking-widest text-white shadow-[0_0_20px_rgba(0,0,0,0.9)] backdrop-blur-md transition-all duration-300 hover:border-neon-cyan hover:text-neon-cyan hover:shadow-[0_0_20px_rgba(0,243,255,0.5)]"
           >
             Back to Main Terminal
           </a>

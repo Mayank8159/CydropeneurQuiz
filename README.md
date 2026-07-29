@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ CYDROPENEUR ⚡
+# ⚡ CYDROPRENEUR ⚡
 
 ![Status](https://img.shields.io/badge/STATUS-ONLINE-brightgreen?style=for-the-badge&labelColor=0a0a1a)
 ![Version](https://img.shields.io/badge/VERSION-1.0-cyan?style=for-the-badge&labelColor=0a0a1a)
@@ -74,12 +74,27 @@ cd CydropeneurQuiz
 # Install dependencies
 pnpm install
 
+# Setup environment variables (copy template files and populate required keys in .env)
+cp apps/web/.env.example apps/web/.env
+cp apps/backend/.env.example apps/backend/.env
+
 # Run frontend (terminal 1)
 pnpm dev:web
 
 # Run backend (terminal 2)
 pnpm dev:backend
 ```
+
+### Environment Configuration (`.env`)
+Ensure your `.env` files contain the required security credentials (never commit `.env` to git):
+- `apps/web/.env`:
+  - `NEXT_PUBLIC_API_URL`: Blank for local dev (uses local Next.js API routes), or set to deployed AWS API Gateway URL.
+  - `NEXT_PUBLIC_EVENT_PASSKEY`: Required player event access key.
+  - `ADMIN_EMAIL`: Comma-separated allowed admin emails.
+  - `ADMIN_PASSKEY`: Secret admin authentication passkey.
+- `apps/backend/.env`:
+  - `ADMIN_EMAIL`: Allowed admin emails for Lambda auth.
+  - `ADMIN_PASSKEY`: Admin passkey for Lambda auth.
 
 ---
 
@@ -107,6 +122,7 @@ cydropeneur-quiz/
 │       │   ├── questions.ts         # GET  /api/questions
 │       │   ├── submit.ts            # POST /api/submit
 │       │   ├── check-player.ts      # GET  /api/check-player
+│       │   ├── admin-login.ts       # POST /api/admin/login
 │       │   ├── admin-questions.ts   # CRUD /api/admin/questions
 │       │   ├── admin-leaderboard.ts # GET  /api/admin/leaderboard
 │       │   └── admin-clear-data.ts  # POST /api/admin/clear-data
@@ -136,6 +152,7 @@ cydropeneur-quiz/
 | <img src="https://img.shields.io/badge/-GET-0f0?style=flat-square&labelColor=0a0a1a"> | `/api/questions` | Public | Fetch quiz questions |
 | <img src="https://img.shields.io/badge/-POST-0ff?style=flat-square&labelColor=0a0a1a"> | `/api/submit` | Public | Submit quiz answers |
 | <img src="https://img.shields.io/badge/-GET-0f0?style=flat-square&labelColor=0a0a1a"> | `/api/check-player` | Public | Check name uniqueness |
+| <img src="https://img.shields.io/badge/-POST-0ff?style=flat-square&labelColor=0a0a1a"> | `/api/admin/login` | <img src="https://img.shields.io/badge/-ADMIN-f0f?style=flat-square&labelColor=0a0a1a"> | Admin email & passkey login |
 | <img src="https://img.shields.io/badge/-POST-0ff?style=flat-square&labelColor=0a0a1a"> | `/api/admin/questions` | <img src="https://img.shields.io/badge/-ADMIN-f0f?style=flat-square&labelColor=0a0a1a"> | Create question |
 | <img src="https://img.shields.io/badge/-DELETE-f00?style=flat-square&labelColor=0a0a1a"> | `/api/admin/questions` | <img src="https://img.shields.io/badge/-ADMIN-f0f?style=flat-square&labelColor=0a0a1a"> | Delete question |
 | <img src="https://img.shields.io/badge/-GET-0f0?style=flat-square&labelColor=0a0a1a"> | `/api/admin/leaderboard` | <img src="https://img.shields.io/badge/-ADMIN-f0f?style=flat-square&labelColor=0a0a1a"> | Fetch leaderboard |
@@ -167,7 +184,7 @@ cydropeneur-quiz/
 > SYSTEM STATUS: ONLINE // ALL SYSTEMS NOMINAL
 ```
 
-![CYDROPENEUR](https://img.shields.io/badge/CYDROPENEUR-v1.0-0ff?style=for-the-badge&labelColor=0a0a1a)
+![CYDROPRENEUR](https://img.shields.io/badge/CYDROPRENEUR-v1.0-0ff?style=for-the-badge&labelColor=0a0a1a)
 ![PRODUCTION](https://img.shields.io/badge/PRODUCTION-LIVE-0f0?style=for-the-badge&labelColor=0a0a1a)
 
 </div>

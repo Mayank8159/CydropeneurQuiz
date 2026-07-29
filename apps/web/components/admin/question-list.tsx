@@ -50,7 +50,7 @@ export function QuestionList({ questions, onDelete, deleting }: QuestionListProp
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, x: -50, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="overflow-hidden rounded-lg border border-muted-steel/15 bg-cyber-surface/30"
+              className="overflow-hidden rounded-lg border border-white/20 bg-white/[0.08] backdrop-blur-md"
             >
               {/* Question header row */}
               <div className="flex items-center gap-3 px-3 py-3 sm:px-4">
