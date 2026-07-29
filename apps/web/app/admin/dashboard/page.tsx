@@ -136,7 +136,7 @@ export default function AdminDashboardPage() {
           />
           <div className="flex items-center gap-2">
             <NeonButton
-              variant="ghost"
+              variant="cyan"
               size="sm"
               onClick={() => setShowGuide(true)}
             >
@@ -146,7 +146,7 @@ export default function AdminDashboardPage() {
               </span>
             </NeonButton>
             <NeonButton
-              variant="ghost"
+              variant="pink"
               size="sm"
               onClick={() => {
                 sessionStorage.removeItem("adminAuth");
