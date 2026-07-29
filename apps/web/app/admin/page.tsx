@@ -74,6 +74,7 @@ export default function AdminPage() {
               value={passkey}
               onChange={(e) => setPasskey(e.target.value)}
               required
+              showPasswordToggle
               labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
               className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"
             />
