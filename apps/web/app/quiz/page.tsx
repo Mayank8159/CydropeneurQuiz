@@ -73,6 +73,15 @@ export default function QuizPage() {
   const [error, setError] = useState("");
   const [errorType, setErrorType] = useState<"server" | "empty" | "">("");
 
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => {
+      setError("");
+      setErrorType("");
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [error]);
+
   // Grid Visited & Marked states
   const [visited, setVisited] = useState<Record<number, boolean>>({ 0: true });
   const [marked, setMarked] = useState<Record<number, boolean>>({});
@@ -310,23 +319,23 @@ export default function QuizPage() {
     >
       {/* HUD Header */}
       <header className="glass sticky top-0 z-40 border-b border-neon-cyan/10 bg-black/40 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-1.5">
-          <div className="flex items-center gap-3.5">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6 sm:py-2.5">
+          <div className="flex items-center gap-4 sm:gap-5">
             <Image
               src="/logo.png"
-              alt="CYDROPENEUR"
-              width={140}
-              height={35}
-              className="h-auto w-auto max-w-[95px] object-contain"
+              alt="CYDROPRENEUR"
+              width={220}
+              height={55}
+              className="h-auto w-auto max-w-[140px] sm:max-w-[190px] object-contain"
               priority
             />
-            <div className="h-6 w-[1.5px] bg-white/20 shrink-0" />
+            <div className="h-8 sm:h-10 w-[1.5px] bg-white/20 shrink-0" />
             <Image
               src="/title.png"
               alt="Quiz Title"
-              width={160}
-              height={40}
-              className="h-auto w-auto max-w-[110px] object-contain shrink-0"
+              width={250}
+              height={60}
+              className="h-auto w-auto max-w-[160px] sm:max-w-[210px] object-contain shrink-0"
               priority
             />
           </div>
@@ -354,8 +363,8 @@ export default function QuizPage() {
       </header>
 
       {/* Main Grid Workspace */}
-      <main className="flex-1 px-4 py-3 md:px-6 md:py-4 mx-auto w-full max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_20%] gap-5 items-start">
+      <main className="flex-1 px-3 py-3 sm:px-4 md:px-6 md:py-4 mx-auto w-full max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] xl:grid-cols-[1fr_290px] gap-4 sm:gap-6 items-start">
 
           {/* Left Column (80%): Question & Actions */}
           <div className="space-y-4">

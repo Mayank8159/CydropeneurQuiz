@@ -91,7 +91,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
         {entries.map((entry) => (
           <div
             key={entry.rank}
-            className="rounded-lg border border-muted-steel/10 bg-cyber-surface/30 p-3"
+            className="rounded-lg border border-white/20 bg-white/[0.08] p-3 backdrop-blur-md"
           >
             <div className="mb-2 flex items-center justify-between">
               <span className="font-display text-sm font-bold text-neon-cyan">

@@ -76,7 +76,7 @@ export function PwaInstallPrompt() {
             </div>
 
             <p className="mb-6 font-body text-sm text-muted-steel">
-              Install CYDROPENEUR on your device for quick access and a full-screen
+              Install CYDROPRENEUR on your device for quick access and a full-screen
               experience.
             </p>
 

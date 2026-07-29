@@ -24,6 +24,14 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!error) return;
+    const timer = setTimeout(() => {
+      setError("");
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [error]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -55,27 +63,27 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-8 touch-none">
-      <div className="w-full max-w-[400px] space-y-6 translate-y-[18vh] sm:translate-y-[22vh] md:translate-y-[26vh]">
+    <div className="flex min-h-dvh items-center md:items-start justify-center px-4 py-6 sm:py-10">
+      <div className="w-full max-w-[400px] space-y-6 my-auto md:my-0 md:mt-[44vh] lg:mt-[48vh] xl:mt-[50vh] pb-8">
 
         {/* Glassmorphism Card Container */}
         <div
-          className="flex flex-col w-full rounded-2xl p-5 sm:p-6 shadow-2xl border-2 border-white/20 text-white bg-black/80 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.5)] justify-center"
+          className="flex flex-col w-full rounded-2xl p-5 sm:p-6 shadow-2xl border-2 border-white/30 text-white bg-white/[0.12] backdrop-blur-2xl shadow-[0_0_40px_rgba(255,255,255,0.12)] justify-center"
         >
           {/* Title */}
           <h2 className="text-base sm:text-lg text-center font-display font-normal tracking-wide uppercase text-white mb-6">
             SIGN UP FOR QUIZ
           </h2>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <form onSubmit={handleLogin} className="flex flex-col gap-4 sm:gap-5">
             <NeonInput
               label="Player Name"
               placeholder="Enter your callsign..."
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               required
-              labelClassName="text-white/80 font-normal text-[10px] tracking-normal"
-              className="bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.15)] text-sm"
+              labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
+              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"
             />
 
             <NeonInput
@@ -85,8 +93,8 @@ export default function Home() {
               value={passkey}
               onChange={(e) => setPasskey(e.target.value)}
               required
-              labelClassName="text-white/80 font-normal text-[10px] tracking-normal"
-              className="bg-black/30 border-white/10 text-white placeholder:text-white/30 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.15)] text-sm"
+              labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
+              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"
             />
 
             <AnimatePresence>
@@ -124,10 +132,10 @@ export default function Home() {
         </div>
 
         {/* Footer Link */}
-        <div className="text-center">
+        <div className="text-center mt-2">
           <a
             href="/admin"
-            className="font-display text-xs uppercase tracking-widest text-white/40 transition-colors hover:text-neon-cyan"
+            className="inline-block rounded-full bg-black/80 border border-white/50 px-5 py-2.5 font-display text-xs font-bold uppercase tracking-widest text-white shadow-[0_0_20px_rgba(0,0,0,0.9)] backdrop-blur-md transition-all duration-300 hover:border-neon-pink hover:text-neon-pink hover:shadow-[0_0_20px_rgba(255,0,128,0.5)]"
           >
             Admin Terminal
           </a>

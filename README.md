@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ CYDROPENEUR ⚡
+# ⚡ CYDROPRENEUR ⚡
 
 ![Status](https://img.shields.io/badge/STATUS-ONLINE-brightgreen?style=for-the-badge&labelColor=0a0a1a)
 ![Version](https://img.shields.io/badge/VERSION-1.0-cyan?style=for-the-badge&labelColor=0a0a1a)
@@ -167,7 +167,7 @@ cydropeneur-quiz/
 > SYSTEM STATUS: ONLINE // ALL SYSTEMS NOMINAL
 ```
 
-![CYDROPENEUR](https://img.shields.io/badge/CYDROPENEUR-v1.0-0ff?style=for-the-badge&labelColor=0a0a1a)
+![CYDROPRENEUR](https://img.shields.io/badge/CYDROPRENEUR-v1.0-0ff?style=for-the-badge&labelColor=0a0a1a)
 ![PRODUCTION](https://img.shields.io/badge/PRODUCTION-LIVE-0f0?style=for-the-badge&labelColor=0a0a1a)
 
 </div>

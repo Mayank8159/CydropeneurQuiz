@@ -159,7 +159,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Question Form Section */}
-        <CyberCard glow="pink">
+        <CyberCard glow="pink" className="bg-white/[0.08] border-white/25 backdrop-blur-xl">
           <div className="mb-4 flex items-center gap-2 text-neon-pink sm:mb-6">
             <Database size={18} />
             <h2 className="font-display text-xs uppercase tracking-widest sm:text-sm">
@@ -170,7 +170,7 @@ export default function AdminDashboardPage() {
         </CyberCard>
 
         {/* Deployed Questions Section */}
-        <CyberCard glow="cyan">
+        <CyberCard glow="cyan" className="bg-white/[0.08] border-white/25 backdrop-blur-xl">
           <div className="mb-4 flex items-center justify-between sm:mb-6">
             <div className="flex items-center gap-2 text-neon-cyan">
               <List size={18} />
@@ -198,7 +198,7 @@ export default function AdminDashboardPage() {
         </CyberCard>
 
         {/* Leaderboard Section */}
-        <CyberCard glow="cyan">
+        <CyberCard glow="cyan" className="bg-white/[0.08] border-white/25 backdrop-blur-xl">
           <div className="mb-4 flex items-center justify-between sm:mb-6">
             <div className="flex items-center gap-2 text-neon-cyan">
               <BarChart3 size={18} />
@@ -222,14 +222,14 @@ export default function AdminDashboardPage() {
         </CyberCard>
 
         {/* Danger Zone */}
-        <CyberCard glow="pink">
+        <CyberCard glow="pink" className="bg-white/[0.08] border-white/25 backdrop-blur-xl">
           <div className="mb-4 flex items-center gap-2 text-red-400 sm:mb-6">
             <Trash2 size={18} />
             <h2 className="font-display text-xs uppercase tracking-widest sm:text-sm">
               Danger Zone
             </h2>
           </div>
-          <p className="mb-4 text-xs text-white/50">
+          <p className="mb-4 text-xs text-white/70">
             This will permanently delete all questions and leaderboard entries from the database.
           </p>
           {!showClearConfirm ? (
@@ -286,7 +286,7 @@ export default function AdminDashboardPage() {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
-              className="glass glow-pink w-full max-w-lg rounded-lg border border-neon-pink/30 p-6"
+              className="glass glow-pink w-full max-w-lg rounded-lg border border-white/30 bg-white/[0.12] p-6 backdrop-blur-2xl"
             >
               <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-neon-pink">

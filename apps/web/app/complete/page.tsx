@@ -7,7 +7,7 @@ import { GlitchText } from "@/components/ui/glitch-text";
 import { CyberCard } from "@/components/ui/cyber-card";
 import { NeonButton } from "@/components/ui/neon-button";
 import { formatTimeMs } from "@/lib/utils";
-import { Trophy, Clock, Target, RotateCcw } from "lucide-react";
+import { Clock, CheckCircle2, Home } from "lucide-react";
 
 interface QuizResult {
   score: number;
@@ -33,26 +33,27 @@ export default function CompletePage() {
 
   if (!result) return null;
 
-  const percentage =
-    result.totalQuestions > 0
-      ? Math.round((result.score / result.totalQuestions) * 100)
-      : 0;
-
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4">
-      <div className="w-full max-w-lg space-y-6 sm:space-y-8">
+    <div className="flex min-h-dvh items-center justify-center px-4 py-8">
+      <div className="w-full max-w-md space-y-6 sm:space-y-8">
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
-          className="text-center"
+          className="text-center flex flex-col items-center"
         >
+          <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan shadow-[0_0_25px_rgba(0,243,255,0.25)]">
+            <CheckCircle2 size={36} />
+          </div>
           <GlitchText
-            text="SESSION COMPLETE"
-            className="text-2xl font-bold tracking-wider text-neon-cyan text-glow-cyan sm:text-3xl md:text-4xl"
+            text="SUBMISSION SUCCESSFUL"
+            className="text-2xl font-bold tracking-wider text-neon-cyan text-glow-cyan sm:text-3xl"
           />
-          <p className="mt-2 font-display text-xs uppercase tracking-[0.15em] text-muted-steel sm:text-sm sm:tracking-[0.2em]">
-            Mission Report for {result.playerName}
+          <p className="mt-2 font-display text-xs uppercase tracking-[0.15em] text-white/80 sm:text-sm sm:tracking-[0.2em]">
+            Thank you for participating, {result.playerName}
+          </p>
+          <p className="mt-1 text-xs text-white/60 font-sans">
+            Your responses have been recorded successfully.
           </p>
         </motion.div>
 
@@ -61,35 +62,17 @@ export default function CompletePage() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          <CyberCard glow="cyan">
-            <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
-              <div className="flex flex-col items-center gap-1.5 sm:gap-2">
-                <Trophy className="text-neon-pink" size={20} />
-                <span className="font-display text-xl font-bold text-neon-pink sm:text-3xl">
-                  {result.score}
-                </span>
-                <span className="font-display text-[8px] uppercase tracking-widest text-muted-steel sm:text-[10px]">
-                  Score ({percentage}%)
+          <CyberCard glow="cyan" className="bg-white/[0.08] border-white/20 backdrop-blur-xl py-8">
+            <div className="flex flex-col items-center justify-center gap-2 text-center">
+              <div className="flex items-center gap-2 text-neon-cyan/80">
+                <Clock size={18} />
+                <span className="font-display text-xs uppercase tracking-widest text-white/70">
+                  TOTAL TIME TAKEN
                 </span>
               </div>
-              <div className="flex flex-col items-center gap-1.5 sm:gap-2">
-                <Clock className="text-neon-cyan" size={20} />
-                <span className="font-display text-base font-bold text-neon-cyan sm:text-3xl">
-                  {formatTimeMs(result.timeElapsedMs)}
-                </span>
-                <span className="font-display text-[8px] uppercase tracking-widest text-muted-steel sm:text-[10px]">
-                  Time
-                </span>
-              </div>
-              <div className="flex flex-col items-center gap-1.5 sm:gap-2">
-                <Target className="text-neon-cyan" size={20} />
-                <span className="font-display text-xl font-bold text-neon-cyan sm:text-3xl">
-                  #{result.rank}
-                </span>
-                <span className="font-display text-[8px] uppercase tracking-widest text-muted-steel sm:text-[10px]">
-                  Rank / {result.totalPlayers}
-                </span>
-              </div>
+              <span className="font-display text-3xl font-bold text-neon-cyan sm:text-4xl tracking-wider text-glow-cyan">
+                {formatTimeMs(result.timeElapsedMs)}
+              </span>
             </div>
           </CyberCard>
         </motion.div>
@@ -108,8 +91,8 @@ export default function CompletePage() {
             }}
           >
             <span className="flex items-center gap-2">
-              <RotateCcw size={16} />
-              New Session
+              <Home size={16} />
+              Return to Home
             </span>
           </NeonButton>
         </motion.div>
@@ -117,3 +100,4 @@ export default function CompletePage() {
     </div>
   );
 }
+

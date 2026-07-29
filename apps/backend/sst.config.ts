@@ -1,7 +1,7 @@
-/// <reference path="./.sst/platform/config.d.ts" />
+/// <reference path="./sst-env.d.ts" />
 
 export default $config({
-  app(input) {
+  app(input: any) {
     return {
       name: "cydropeneur-quiz",
       removal: input?.stage === "production" ? "retain" : "remove",
@@ -82,6 +82,14 @@ export default $config({
       environment: {
         QUESTIONS_TABLE: questionsTable.name,
         SUBMISSIONS_TABLE: submissionsTable.name,
+        ADMIN_PASSKEY: process.env.ADMIN_PASSKEY || "",
+      },
+    });
+
+    api.route("POST /api/admin/login", {
+      handler: "functions/admin-login.handler",
+      environment: {
+        ADMIN_USERNAME: process.env.ADMIN_USERNAME || "admin",
         ADMIN_PASSKEY: process.env.ADMIN_PASSKEY || "",
       },
     });

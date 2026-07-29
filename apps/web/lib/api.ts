@@ -126,3 +126,13 @@ export function adminClearData() {
     }
   );
 }
+
+export function adminLogin(payload: { username: string; passkey: string }) {
+  return apiFetch<{ success: boolean; username?: string; message?: string }>(
+    "/api/admin/login",
+    {
+      method: "POST",
+      body: payload,
+    }
+  );
+}
