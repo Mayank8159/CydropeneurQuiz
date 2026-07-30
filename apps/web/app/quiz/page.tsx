@@ -367,7 +367,7 @@ export default function QuizPage() {
       </header>
 
       {/* Main Grid Workspace */}
-      <main className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 md:px-6 md:py-4 mx-auto w-full max-w-7xl">
+      <main className="flex-1 min-h-0 overflow-y-auto px-3 py-3 sm:px-4 md:px-6 md:py-4 mx-auto w-full max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] xl:grid-cols-[1fr_290px] gap-4 sm:gap-6 items-start">
 
           {/* Left Column (80%): Question & Actions */}
