@@ -41,6 +41,7 @@ export const QuestionSchema = z.object({
 
 export const SubmitPayloadSchema = z.object({
   playerName: z.string().min(1),
+  playerEmail: z.string(),
   answers: z.record(z.string(), z.enum(["a", "b", "c", "d"])),
   timeElapsedMs: z.number().min(0),
 });

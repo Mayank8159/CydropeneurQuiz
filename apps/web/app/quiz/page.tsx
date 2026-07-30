@@ -65,6 +65,7 @@ const getCategoryForQuestion = (qNumber: number): string => {
 export default function QuizPage() {
   const router = useRouter();
   const [playerName, setPlayerName] = useState("");
+  const [playerEmail, setPlayerEmail] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -144,11 +145,13 @@ export default function QuizPage() {
 
   useEffect(() => {
     const name = sessionStorage.getItem("playerName");
+    const email = sessionStorage.getItem("playerEmail");
     if (!name) {
       router.push("/");
       return;
     }
     setPlayerName(name);
+    setPlayerEmail(email || "");
 
     fetchQuestions()
       .then((q) => {
@@ -183,6 +186,7 @@ export default function QuizPage() {
     try {
       const result = await submitQuiz({
         playerName,
+        playerEmail,
         answers,
         timeElapsedMs: time,
       });

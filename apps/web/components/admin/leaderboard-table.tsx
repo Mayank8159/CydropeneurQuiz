@@ -4,6 +4,7 @@ interface LeaderboardTableProps {
   entries: Array<{
     rank: number;
     playerName: string;
+    playerEmail: string;
     score: number;
     timeElapsedMs: number;
     submittedAt: string;
@@ -49,6 +50,9 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
             <th className="px-3 py-2.5 text-left font-display text-[10px] uppercase tracking-widest text-neon-cyan sm:px-4 sm:py-3 sm:text-xs">
               Player
             </th>
+            <th className="px-3 py-2.5 text-left font-display text-[10px] uppercase tracking-widest text-neon-cyan sm:px-4 sm:py-3 sm:text-xs">
+              Email
+            </th>
             <th className="px-3 py-2.5 text-right font-display text-[10px] uppercase tracking-widest text-neon-cyan sm:px-4 sm:py-3 sm:text-xs">
               Score
             </th>
@@ -71,6 +75,9 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
               </td>
               <td className="px-3 py-2.5 font-body text-sm text-ice-white sm:px-4 sm:py-3">
                 {entry.playerName}
+              </td>
+              <td className="px-3 py-2.5 font-body text-xs text-muted-steel sm:px-4 sm:py-3">
+                {entry.playerEmail}
               </td>
               <td className="px-3 py-2.5 text-right font-display text-sm font-bold text-neon-pink sm:px-4 sm:py-3">
                 {entry.score}
@@ -108,6 +115,9 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
               <span className="font-display text-xs text-muted-steel">
                 {formatTime(entry.timeElapsedMs)}
               </span>
+            </div>
+            <div className="mt-1 text-[10px] font-body text-muted-steel/70 truncate">
+              {entry.playerEmail}
             </div>
           </div>
         ))}

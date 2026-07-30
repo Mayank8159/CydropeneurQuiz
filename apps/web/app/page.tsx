@@ -60,6 +60,7 @@ export default function Home() {
     }
 
     sessionStorage.setItem("playerName", playerName.trim().toLowerCase());
+    sessionStorage.setItem("playerEmail", email.trim().toLowerCase());
     router.push("/quiz");
   };
 

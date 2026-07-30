@@ -20,6 +20,7 @@ export async function handler() {
     const leaderboard = items.map((entry, index) => ({
       rank: index + 1,
       playerName: entry.playerName,
+      playerEmail: entry.playerEmail || "",
       score: entry.score,
       timeElapsedMs: entry.timeElapsedMs,
       submittedAt: entry.submittedAt,

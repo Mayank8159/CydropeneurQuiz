@@ -25,8 +25,9 @@ export async function handler(event: any) {
     }
 
     const body = JSON.parse(event.body || "{}");
-    const { playerName: rawName, answers, timeElapsedMs } = body;
+    const { playerName: rawName, playerEmail, answers, timeElapsedMs } = body;
     const playerName = rawName?.trim().toLowerCase();
+    const email = playerEmail?.trim().toLowerCase();
 
     if (!playerName || !answers || timeElapsedMs === undefined) {
       return {
@@ -50,6 +51,7 @@ export async function handler(event: any) {
     const submission = {
       submissionId: randomUUID(),
       playerName,
+      playerEmail: email || "",
       score,
       timeElapsedMs,
       submittedAt: new Date().toISOString(),

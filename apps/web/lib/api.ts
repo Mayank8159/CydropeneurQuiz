@@ -47,6 +47,7 @@ export function fetchQuestions() {
 
 export function submitQuiz(payload: {
   playerName: string;
+  playerEmail: string;
   answers: Record<string, string>;
   timeElapsedMs: number;
 }) {
@@ -103,6 +104,7 @@ export function fetchLeaderboard() {
   return apiFetch<Array<{
     rank: number;
     playerName: string;
+    playerEmail: string;
     score: number;
     timeElapsedMs: number;
     submittedAt: string;
