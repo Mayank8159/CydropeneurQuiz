@@ -319,7 +319,7 @@ export default function QuizPage() {
     <div
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="flex min-h-dvh flex-col select-none"
+      className="flex lg:h-dvh min-h-dvh flex-col select-none"
     >
       {/* HUD Header */}
       <header className="glass sticky top-0 z-40 border-b border-neon-cyan/10 bg-black/40 backdrop-blur-md">
