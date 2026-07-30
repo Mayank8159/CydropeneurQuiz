@@ -4,13 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { NeonInput } from "@/components/ui/neon-input";
-import { checkPlayerName } from "@/lib/api";
+import { checkParticipantEmail } from "@/lib/api";
 
 const EVENT_PASSKEY = process.env.NEXT_PUBLIC_EVENT_PASSKEY || "";
 
 export default function Home() {
   const router = useRouter();
   const [playerName, setPlayerName] = useState("");
+  const [email, setEmail] = useState("");
   const [passkey, setPasskey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,9 +47,9 @@ export default function Home() {
     }
 
     try {
-      const { exists } = await checkPlayerName(playerName);
-      if (exists) {
-        setError("CALLSIGN TAKEN // ANOTHER OPERATIVE HAS THIS IDENTITY");
+      const emailCheck = await checkParticipantEmail(email);
+      if (!emailCheck.exists) {
+        setError("EMAIL NOT REGISTERED // YOU ARE NOT ON THE LIST");
         setLoading(false);
         return;
       }
@@ -81,6 +82,17 @@ export default function Home() {
               placeholder="Enter your callsign..."
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
+              required
+              labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
+              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"
+            />
+
+            <NeonInput
+              label="Email Address"
+              type="email"
+              placeholder="Enter your email..."
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
               className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"

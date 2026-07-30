@@ -115,6 +115,12 @@ export function checkPlayerName(name: string) {
   );
 }
 
+export function checkParticipantEmail(email: string) {
+  return apiFetch<{ exists: boolean }>(
+    `/api/check-participant?email=${encodeURIComponent(email)}`
+  );
+}
+
 export function adminClearData() {
   return apiFetch<{ success: boolean; questionsCleared: number; submissionsCleared: number }>(
     "/api/admin/clear-data",

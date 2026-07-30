@@ -7,11 +7,13 @@
     "dev": "sst dev",
     "build": "sst build",
     "deploy": "sst deploy",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "seed:participants": "node scripts/seed-participants.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.600.0",
     "@aws-sdk/util-dynamodb": "^3.600.0",
+    "xlsx": "^0.18.5",
     "zod": "^3.23.0"
   },
   "devDependencies": {

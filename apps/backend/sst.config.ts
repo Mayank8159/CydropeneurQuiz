@@ -26,6 +26,13 @@ export default $config({
       primaryIndex: { hashKey: "submissionId" },
     });
 
+    const participantsTable = new sst.aws.Dynamo("ParticipantsTable", {
+      fields: {
+        email: "string",
+      },
+      primaryIndex: { hashKey: "email" },
+    });
+
     const api = new sst.aws.ApiGatewayV2("QuizApi", {
       cors: {
         allowOrigins: ["*"],
@@ -73,6 +80,14 @@ export default $config({
       link: [submissionsTable],
       environment: {
         SUBMISSIONS_TABLE: submissionsTable.name,
+      },
+    });
+
+    api.route("GET /api/check-participant", {
+      handler: "functions/check-participant.handler",
+      link: [participantsTable],
+      environment: {
+        PARTICIPANTS_TABLE: participantsTable.name,
       },
     });
 

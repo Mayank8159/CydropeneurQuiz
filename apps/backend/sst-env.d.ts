@@ -6,6 +6,22 @@
 
 declare module "sst" {
   export interface Resource {
+    "ParticipantsTable": {
+      "name": string
+      "type": "sst.aws.Dynamo"
+    }
+    "QuestionsTable": {
+      "name": string
+      "type": "sst.aws.Dynamo"
+    }
+    "QuizApi": {
+      "type": "sst.aws.ApiGatewayV2"
+      "url": string
+    }
+    "SubmissionsTable": {
+      "name": string
+      "type": "sst.aws.Dynamo"
+    }
   }
 }
 

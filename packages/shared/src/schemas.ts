@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const LoginPayloadSchema = z.object({
   playerName: z.string().min(1, "Player name is required").max(100),
+  email: z.string().email("Valid email is required"),
   passkey: z.string().min(1, "Passkey is required"),
 });
 
