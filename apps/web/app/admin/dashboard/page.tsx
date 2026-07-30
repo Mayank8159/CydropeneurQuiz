@@ -48,6 +48,7 @@ export default function AdminDashboardPage() {
     Array<{
       rank: number;
       playerName: string;
+      playerEmail: string;
       score: number;
       timeElapsedMs: number;
       submittedAt: string;
