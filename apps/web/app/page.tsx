@@ -64,8 +64,8 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-dvh items-center md:items-start justify-center px-4 py-6 sm:py-10">
-      <div className="w-full max-w-[400px] space-y-6 my-auto md:my-0 md:mt-[44vh] lg:mt-[48vh] xl:mt-[50vh] pb-8">
+    <div className="flex min-h-dvh items-center justify-center px-4 py-6 sm:py-10">
+      <div className="w-full max-w-[400px] space-y-6 my-auto pb-8">
 
         {/* Glassmorphism Card Container */}
         <div
