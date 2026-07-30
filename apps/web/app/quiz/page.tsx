@@ -367,7 +367,7 @@ export default function QuizPage() {
       </header>
 
       {/* Main Grid Workspace */}
-      <main className="flex-1 px-3 py-3 sm:px-4 md:px-6 md:py-4 mx-auto w-full max-w-7xl">
+      <main className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 md:px-6 md:py-4 mx-auto w-full max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] xl:grid-cols-[1fr_290px] gap-4 sm:gap-6 items-start">
 
           {/* Left Column (80%): Question & Actions */}
@@ -490,7 +490,7 @@ export default function QuizPage() {
           </div>
 
           {/* Right Column (20%): Glassmorphic Sidebar Grid (Hidden on mobile/tablet) */}
-          <div className="hidden lg:block bg-black/50 backdrop-blur-xl border-2 border-white/20 rounded-2xl p-4 shadow-2xl space-y-4">
+          <div className="hidden lg:block lg:sticky lg:top-0 bg-black/50 backdrop-blur-xl border-2 border-white/20 rounded-2xl p-4 shadow-2xl space-y-4">
 
             {/* Timer Widget */}
             <div className="text-center border-b border-white/10 pb-2.5">
