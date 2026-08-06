@@ -4,14 +4,12 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
-import { HudBadge } from "@/components/ui/hud-badge";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { NeonButton } from "@/components/ui/neon-button";
 import { QuestionCard } from "@/components/quiz/question-card";
 import { useTimer } from "@/hooks/use-timer";
 import { fetchQuestions, submitQuiz } from "@/lib/api";
-import { formatTimeMs } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Send, Flag, RotateCcw, Clock, LayoutGrid, ShieldAlert, AlertTriangle, Maximize, Lock } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, Flag, RotateCcw, Clock, LayoutGrid, ShieldAlert, Maximize, Lock } from "lucide-react";
 
 interface Question {
   qId: string;
@@ -22,14 +20,31 @@ interface Question {
 
 const TOTAL_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
 
+/**
+ * Returns true for iOS Safari, Android Chrome, and other mobile browsers
+ * where the Fullscreen API is unsupported or unreliable.
+ */
+const isMobileDevice = (): boolean => {
+  if (typeof navigator === "undefined") return false;
+  return (
+    /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+    (navigator.maxTouchPoints > 1 &&
+      !window.matchMedia("(pointer: fine)").matches)
+  );
+};
+
 const requestFullscreenMode = () => {
+  // Fullscreen API is unsupported on iOS Safari and unreliable on Android
+  if (isMobileDevice()) return;
   const elem = document.documentElement as any;
   if (elem.requestFullscreen) {
     elem.requestFullscreen().catch((err: any) => console.log("Fullscreen request error:", err));
   } else if (elem.webkitRequestFullscreen) {
     elem.webkitRequestFullscreen().catch((err: any) => console.log("Webkit fullscreen request error:", err));
+  } else if (elem.mozRequestFullScreen) {
+    elem.mozRequestFullScreen(); // Firefox desktop
   } else if (elem.msRequestFullscreen) {
-    elem.msRequestFullscreen();
+    elem.msRequestFullscreen(); // IE/Edge legacy
   }
 };
 
@@ -114,15 +129,26 @@ export default function QuizPage() {
   const [isMobileGridOpen, setIsMobileGridOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
-  // Restore anti-cheating state from sessionStorage on mount
+  // Restore anti-cheating state from sessionStorage / localStorage on mount
   useEffect(() => {
-    const savedViolations = parseInt(sessionStorage.getItem("quiz_violations") || "0", 10);
-    const savedStarted = sessionStorage.getItem("quiz_has_started") === "true";
+    const savedViolations = parseInt(
+      sessionStorage.getItem("quiz_violations") ||
+        localStorage.getItem("quiz_violations") ||
+        "0",
+      10
+    );
+    const savedStarted =
+      sessionStorage.getItem("quiz_has_started") === "true" ||
+      localStorage.getItem("quiz_has_started") === "true";
     if (savedViolations > 0) {
       setViolations(savedViolations);
     }
     if (savedStarted) {
       setHasStarted(true);
+      // Re-request fullscreen for players resuming after a page refresh.
+      // This fires inside a useEffect which is considered a trusted context
+      // on most desktop browsers.
+      requestFullscreenMode();
     }
     if (savedViolations >= 3) {
       setAutoSubmitting(true);
@@ -151,7 +177,7 @@ export default function QuizPage() {
     setTouchStart(null);
   };
 
-  const { elapsedMs, isRunning, start, stop } = useTimer();
+  const { elapsedMs, isRunning, start, startFrom, stop } = useTimer();
   const remainingMs = Math.max(0, TOTAL_LIMIT_MS - elapsedMs);
 
   useEffect(() => {
@@ -182,12 +208,27 @@ export default function QuizPage() {
   }, [isMobileGridOpen]);
 
   useEffect(() => {
-    const name = sessionStorage.getItem("playerName");
-    const email = sessionStorage.getItem("playerEmail");
+    const name =
+      sessionStorage.getItem("playerName") ||
+      localStorage.getItem("playerName");
+    const email =
+      sessionStorage.getItem("playerEmail") ||
+      localStorage.getItem("playerEmail");
     if (!name) {
       router.push("/");
       return;
     }
+    try {
+      sessionStorage.setItem("playerName", name);
+      localStorage.setItem("playerName", name);
+      if (email) {
+        sessionStorage.setItem("playerEmail", email);
+        localStorage.setItem("playerEmail", email);
+      }
+    } catch (e) {
+      console.warn("Storage sync error:", e);
+    }
+
     setPlayerName(name);
     setPlayerEmail(email || "");
 
@@ -199,9 +240,21 @@ export default function QuizPage() {
           setError("NO QUESTIONS ADDED // AWAITING QUESTION DEPLOYMENT");
           setErrorType("empty");
         } else {
-          const savedStarted = sessionStorage.getItem("quiz_has_started") === "true";
+          const savedStarted =
+            sessionStorage.getItem("quiz_has_started") === "true" ||
+            localStorage.getItem("quiz_has_started") === "true";
           if (savedStarted) {
-            start();
+            // Restore timer from the original start timestamp so a
+            // page refresh does not grant the student a fresh 30 min window.
+            const rawTs =
+              sessionStorage.getItem("quiz_start_time") ||
+              localStorage.getItem("quiz_start_time");
+            const savedTs = rawTs ? parseInt(rawTs, 10) : 0;
+            if (savedTs > 0) {
+              startFrom(savedTs);
+            } else {
+              start(); // Fallback if timestamp is somehow missing
+            }
           }
         }
       })
@@ -210,12 +263,20 @@ export default function QuizPage() {
         setErrorType("server");
         setLoading(false);
       });
-  }, [router, start]);
+  }, [router, start, startFrom]);
 
   const handleStartQuiz = useCallback(() => {
     requestFullscreenMode();
     setHasStarted(true);
-    sessionStorage.setItem("quiz_has_started", "true");
+    const quizStartTime = Date.now();
+    try {
+      sessionStorage.setItem("quiz_has_started", "true");
+      localStorage.setItem("quiz_has_started", "true");
+      sessionStorage.setItem("quiz_start_time", String(quizStartTime));
+      localStorage.setItem("quiz_start_time", String(quizStartTime));
+    } catch (e) {
+      console.warn("Storage write error:", e);
+    }
     start();
   }, [start]);
 
@@ -231,8 +292,16 @@ export default function QuizPage() {
   const handleSubmit = useCallback(async () => {
     const time = stop();
     setSubmitting(true);
-    sessionStorage.removeItem("quiz_violations");
-    sessionStorage.removeItem("quiz_has_started");
+    try {
+      sessionStorage.removeItem("quiz_violations");
+      sessionStorage.removeItem("quiz_has_started");
+      sessionStorage.removeItem("quiz_start_time");
+      localStorage.removeItem("quiz_violations");
+      localStorage.removeItem("quiz_has_started");
+      localStorage.removeItem("quiz_start_time");
+    } catch (e) {
+      console.warn("Storage cleanup error:", e);
+    }
     try {
       const result = await submitQuiz({
         playerName,
@@ -261,14 +330,19 @@ export default function QuizPage() {
       if (showViolationModalRef.current) return; // Prevent double counting while modal is already active
 
       const now = Date.now();
-      if (now - lastViolationTimeRef.current < 2000) {
-        return; // 2-second cooldown guard
+      if (now - lastViolationTimeRef.current < 2500) {
+        return; // 2.5-second cooldown guard
       }
       lastViolationTimeRef.current = now;
 
       setViolations((prev) => {
         const next = prev + 1;
-        sessionStorage.setItem("quiz_violations", String(next));
+        try {
+          sessionStorage.setItem("quiz_violations", String(next));
+          localStorage.setItem("quiz_violations", String(next));
+        } catch (e) {
+          console.warn("Storage error:", e);
+        }
 
         if (next >= 3) {
           setAutoSubmitting(true);
@@ -300,31 +374,81 @@ export default function QuizPage() {
     const handleFullscreenChange = () => {
       const isFullscreen = !!(
         document.fullscreenElement ||
-        (document as any).webkitFullscreenElement
+        (document as any).webkitFullscreenElement ||
+        (document as any).mozFullScreenElement ||
+        (document as any).msFullscreenElement
       );
 
-      if (isFullscreen) {
+      const fullscreenSupported = !!(
+        document.fullscreenEnabled ||
+        (document as any).webkitFullscreenEnabled ||
+        (document as any).mozFullScreenEnabled ||
+        (document as any).msFullscreenEnabled
+      );
+      // On mobile the Fullscreen API is unsupported; never raise a violation
+      // for fullscreen exit because fullscreen was never entered.
+      const onMobile = isMobileDevice();
+
+      if (isFullscreen || onMobile) {
         setShowViolationModal(false);
         showViolationModalRef.current = false;
-      } else {
-        triggerViolation("Exited fullscreen mode");
+      } else if (fullscreenSupported && !onMobile) {
+        triggerViolation("Exited Fullscreen Mode");
       }
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        triggerViolation("Switched tab or minimized window");
+        triggerViolation("Switched Tab or Minimized Window");
+      }
+    };
+
+    const handleBlur = () => {
+      // Only count if the page is still visible — prevents double-counting
+      // with visibilitychange when a student switches tabs (both fire otherwise).
+      if (!document.hidden) {
+        triggerViolation("Window Focus Lost / Tab Switched");
+      }
+    };
+
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    const handleCopy = (e: ClipboardEvent) => e.preventDefault();
+    const handlePaste = (e: ClipboardEvent) => e.preventDefault();
+    const handleCut = (e: ClipboardEvent) => e.preventDefault();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) ||
+        (e.ctrlKey && (e.key === "u" || e.key === "U"))
+      ) {
+        e.preventDefault();
       }
     };
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleBlur);
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("copy", handleCopy);
+    document.addEventListener("paste", handlePaste);
+    document.addEventListener("cut", handleCut);
+    document.addEventListener("keydown", handleKeyDown);
 
     return () => {
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("copy", handleCopy);
+      document.removeEventListener("paste", handlePaste);
+      document.removeEventListener("cut", handleCut);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [hasStarted, submitting, triggerViolation]);
 
@@ -499,7 +623,7 @@ export default function QuizPage() {
               className="w-full flex items-center justify-center gap-2 text-sm sm:text-base py-3"
             >
               <Maximize size={18} />
-              <span>Start quiz</span>
+              <span>Enter Full Screen & Start Quiz</span>
             </NeonButton>
           </div>
         </div>

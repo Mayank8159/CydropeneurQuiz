@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { NeonInput } from "@/components/ui/neon-input";
 import { checkParticipantEmail } from "@/lib/api";
-
-const EVENT_PASSKEY = process.env.NEXT_PUBLIC_EVENT_PASSKEY || "";
+const EVENT_PASSKEY = (process.env.NEXT_PUBLIC_EVENT_PASSKEY || "").trim();
 
 export default function Home() {
   const router = useRouter();
@@ -29,7 +28,7 @@ export default function Home() {
     if (!error) return;
     const timer = setTimeout(() => {
       setError("");
-    }, 2000);
+    }, 2500);
     return () => clearTimeout(timer);
   }, [error]);
 
@@ -38,29 +37,46 @@ export default function Home() {
     setError("");
     setLoading(true);
 
-    await new Promise((r) => setTimeout(r, 800));
+    const cleanPasskey = passkey.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = playerName.trim();
 
-    if (passkey !== EVENT_PASSKEY) {
+    await new Promise((r) => setTimeout(r, 600));
+
+    if (cleanPasskey !== EVENT_PASSKEY) {
       setError("ACCESS DENIED // INVALID CLEARANCE");
       setLoading(false);
       return;
     }
 
     try {
-      const emailCheck = await checkParticipantEmail(email);
+      const emailCheck = await checkParticipantEmail(cleanEmail);
       if (!emailCheck.exists) {
         setError("EMAIL NOT REGISTERED // YOU ARE NOT ON THE LIST");
         setLoading(false);
         return;
       }
-    } catch {
-      setError("SERVER NOT CONNECTED // UNABLE TO VERIFY IDENTITY");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      setError(
+        msg === "SERVER_UNAVAILABLE"
+          ? "SERVER NOT CONNECTED // UNABLE TO VERIFY IDENTITY"
+          : "SERVER NOT CONNECTED // UNABLE TO VERIFY IDENTITY"
+      );
       setLoading(false);
       return;
     }
 
-    sessionStorage.setItem("playerName", playerName.trim().toLowerCase());
-    sessionStorage.setItem("playerEmail", email.trim().toLowerCase());
+    // Save in both sessionStorage and localStorage for mobile browser compatibility
+    try {
+      sessionStorage.setItem("playerName", cleanName);
+      sessionStorage.setItem("playerEmail", cleanEmail);
+      localStorage.setItem("playerName", cleanName);
+      localStorage.setItem("playerEmail", cleanEmail);
+    } catch (e) {
+      console.warn("Storage error:", e);
+    }
+
     router.push("/quiz");
   };
 
@@ -84,6 +100,9 @@ export default function Home() {
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               required
+              autoCapitalize="words"
+              autoCorrect="off"
+              autoComplete="off"
               labelClassName="text-white/90 font-normal text-[9px] tracking-normal mb-1"
               className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-xs h-9"
             />
@@ -95,6 +114,9 @@ export default function Home() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="off"
               labelClassName="text-white/90 font-normal text-[9px] tracking-normal mb-1"
               className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-xs h-9"
             />
@@ -107,9 +129,13 @@ export default function Home() {
               onChange={(e) => setPasskey(e.target.value)}
               required
               showPasswordToggle
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="off"
               labelClassName="text-white/90 font-normal text-[9px] tracking-normal mb-1"
               className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-xs h-9"
             />
+
 
             <AnimatePresence>
               {error && (

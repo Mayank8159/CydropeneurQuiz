@@ -1,4 +1,4 @@
-const CACHE_NAME = "cydropeneur-v1";
+const CACHE_NAME = "cydropeneur-v2";
 const STATIC_ASSETS = [
   "/",
   "/admin",
@@ -30,18 +30,8 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return;
 
-  if (request.url.includes("/api/")) {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
-    return;
-  }
+  // API routes are never cached — always fetch fresh from the network
+  if (request.url.includes("/api/")) return;
 
   event.respondWith(
     caches.match(request).then((cached) => {
