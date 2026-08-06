@@ -34,27 +34,27 @@ export default function CompletePage() {
   if (!result) return null;
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md space-y-6 sm:space-y-8 my-auto">
+    <div suppressHydrationWarning className="flex min-h-dvh items-end sm:items-center justify-center px-4 pt-30 pb-8 sm:pt-44 sm:pb-12 overflow-y-auto">
+      <div suppressHydrationWarning className="w-full max-w-[320px] sm:max-w-[340px] space-y-4 mt-32 sm:mt-44 md:mt-52 mb-4">
         {/* Glassmorphic Card Container */}
-        <div className="flex flex-col w-full rounded-2xl p-6 sm:p-8 shadow-2xl border-2 border-white/30 text-white bg-white/[0.12] backdrop-blur-2xl shadow-[0_0_40px_rgba(255,255,255,0.12)] items-center justify-center gap-6">
+        <div className="flex flex-col w-full rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-white/30 text-white bg-white/[0.12] backdrop-blur-2xl shadow-[0_0_40px_rgba(255,255,255,0.12)] items-center justify-center gap-4">
           <motion.div
             initial={{ scale: 0.5, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
             className="text-center flex flex-col items-center w-full"
           >
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan shadow-[0_0_25px_rgba(0,243,255,0.25)]">
-              <CheckCircle2 size={36} />
+            <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-full border-2 border-neon-cyan/40 bg-neon-cyan/10 text-neon-cyan shadow-[0_0_25px_rgba(0,243,255,0.25)]">
+              <CheckCircle2 size={22} />
             </div>
             <GlitchText
               text="SUBMISSION SUCCESSFUL"
-              className="text-2xl font-bold tracking-wider text-neon-cyan text-glow-cyan sm:text-3xl"
+              className="text-xs sm:text-sm font-bold tracking-wider text-neon-cyan text-glow-cyan"
             />
-            <p className="mt-2 font-display text-xs uppercase tracking-[0.15em] text-white/90 sm:text-sm sm:tracking-[0.2em]">
+            <p className="mt-1.5 font-display text-[9px] sm:text-[10px] uppercase tracking-wider text-white/90 truncate max-w-full">
               Thank you for participating, {result.playerName}
             </p>
-            <p className="mt-1 text-xs text-white/70 font-sans">
+            <p className="mt-0.5 text-[9px] text-white/70 font-sans">
               Your responses have been recorded successfully.
             </p>
           </motion.div>
@@ -65,15 +65,15 @@ export default function CompletePage() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="w-full"
           >
-            <div className="bg-white/[0.08] border border-white/30 rounded-2xl py-6 px-8 w-full backdrop-blur-xl shadow-[0_0_25px_rgba(0,243,255,0.2)]">
-              <div className="flex flex-col items-center justify-center gap-2 text-center">
-                <div className="flex items-center gap-2 text-neon-cyan/90">
-                  <Clock size={18} />
-                  <span className="font-display text-xs uppercase tracking-widest text-white/80">
+            <div className="bg-white/[0.08] border border-white/30 rounded-xl py-3 px-4 w-full backdrop-blur-xl shadow-[0_0_25px_rgba(0,243,255,0.2)]">
+              <div className="flex flex-col items-center justify-center gap-1 text-center">
+                <div className="flex items-center gap-1.5 text-neon-cyan/90">
+                  <Clock size={14} />
+                  <span className="font-display text-[9px] uppercase tracking-widest text-white/80">
                     TOTAL TIME TAKEN
                   </span>
                 </div>
-                <span className="font-display text-3xl font-bold text-neon-cyan sm:text-4xl tracking-wider text-glow-cyan">
+                <span className="font-display text-lg sm:text-xl font-bold text-neon-cyan tracking-wider text-glow-cyan">
                   {formatTimeMs(result.timeElapsedMs)}
                 </span>
               </div>
@@ -88,13 +88,15 @@ export default function CompletePage() {
           >
             <NeonButton
               variant="cyan"
+              size="sm"
               onClick={() => {
                 sessionStorage.clear();
                 router.push("/");
               }}
+              className="w-full text-xs py-2 h-9"
             >
-              <span className="flex items-center gap-2">
-                <Home size={16} />
+              <span className="flex items-center justify-center gap-1.5">
+                <Home size={14} />
                 Return to Home
               </span>
             </NeonButton>

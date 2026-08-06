@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
@@ -11,7 +11,7 @@ import { QuestionCard } from "@/components/quiz/question-card";
 import { useTimer } from "@/hooks/use-timer";
 import { fetchQuestions, submitQuiz } from "@/lib/api";
 import { formatTimeMs } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Send, Flag, RotateCcw, Clock, LayoutGrid } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send, Flag, RotateCcw, Clock, LayoutGrid, ShieldAlert, AlertTriangle, Maximize, Lock } from "lucide-react";
 
 interface Question {
   qId: string;
@@ -21,6 +21,17 @@ interface Question {
 }
 
 const TOTAL_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+
+const requestFullscreenMode = () => {
+  const elem = document.documentElement as any;
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen().catch((err: any) => console.log("Fullscreen request error:", err));
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen().catch((err: any) => console.log("Webkit fullscreen request error:", err));
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  }
+};
 
 const formatRemainingTime = (ms: number) => {
   const totalSeconds = Math.floor(ms / 1000);
@@ -83,6 +94,17 @@ export default function QuizPage() {
     return () => clearTimeout(timer);
   }, [error]);
 
+  // Anti-cheating & Fullscreen states
+  const [hasStarted, setHasStarted] = useState(false);
+  const [violations, setViolations] = useState(0);
+  const [showViolationModal, setShowViolationModal] = useState(false);
+  const [violationReason, setViolationReason] = useState("");
+  const [autoSubmitting, setAutoSubmitting] = useState(false);
+
+  const lastViolationTimeRef = useRef<number>(0);
+  const autoSubmittingRef = useRef<boolean>(false);
+  const showViolationModalRef = useRef<boolean>(false);
+
   // Grid Visited & Marked states
   const [visited, setVisited] = useState<Record<number, boolean>>({ 0: true });
   const [marked, setMarked] = useState<Record<number, boolean>>({});
@@ -91,6 +113,22 @@ export default function QuizPage() {
   // Mobile overview drawer & swipe states
   const [isMobileGridOpen, setIsMobileGridOpen] = useState(false);
   const [touchStart, setTouchStart] = useState<number | null>(null);
+
+  // Restore anti-cheating state from sessionStorage on mount
+  useEffect(() => {
+    const savedViolations = parseInt(sessionStorage.getItem("quiz_violations") || "0", 10);
+    const savedStarted = sessionStorage.getItem("quiz_has_started") === "true";
+    if (savedViolations > 0) {
+      setViolations(savedViolations);
+    }
+    if (savedStarted) {
+      setHasStarted(true);
+    }
+    if (savedViolations >= 3) {
+      setAutoSubmitting(true);
+      autoSubmittingRef.current = true;
+    }
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
@@ -161,7 +199,10 @@ export default function QuizPage() {
           setError("NO QUESTIONS ADDED // AWAITING QUESTION DEPLOYMENT");
           setErrorType("empty");
         } else {
-          start();
+          const savedStarted = sessionStorage.getItem("quiz_has_started") === "true";
+          if (savedStarted) {
+            start();
+          }
         }
       })
       .catch(() => {
@@ -170,6 +211,13 @@ export default function QuizPage() {
         setLoading(false);
       });
   }, [router, start]);
+
+  const handleStartQuiz = useCallback(() => {
+    requestFullscreenMode();
+    setHasStarted(true);
+    sessionStorage.setItem("quiz_has_started", "true");
+    start();
+  }, [start]);
 
   const handleSelectAnswer = useCallback(
     (letter: string) => {
@@ -183,6 +231,8 @@ export default function QuizPage() {
   const handleSubmit = useCallback(async () => {
     const time = stop();
     setSubmitting(true);
+    sessionStorage.removeItem("quiz_violations");
+    sessionStorage.removeItem("quiz_has_started");
     try {
       const result = await submitQuiz({
         playerName,
@@ -203,7 +253,80 @@ export default function QuizPage() {
       setError(err instanceof Error ? err.message : "Submission failed");
       setSubmitting(false);
     }
-  }, [playerName, answers, stop, router]);
+  }, [playerName, playerEmail, answers, stop, router]);
+
+  const triggerViolation = useCallback(
+    (reason: string) => {
+      if (autoSubmittingRef.current) return;
+      if (showViolationModalRef.current) return; // Prevent double counting while modal is already active
+
+      const now = Date.now();
+      if (now - lastViolationTimeRef.current < 2000) {
+        return; // 2-second cooldown guard
+      }
+      lastViolationTimeRef.current = now;
+
+      setViolations((prev) => {
+        const next = prev + 1;
+        sessionStorage.setItem("quiz_violations", String(next));
+
+        if (next >= 3) {
+          setAutoSubmitting(true);
+          autoSubmittingRef.current = true;
+          setViolationReason(reason);
+          handleSubmit();
+        } else {
+          setViolationReason(reason);
+          setShowViolationModal(true);
+          showViolationModalRef.current = true;
+        }
+        return next;
+      });
+    },
+    [handleSubmit]
+  );
+
+  const handleResumeFromViolation = useCallback(() => {
+    requestFullscreenMode();
+    setShowViolationModal(false);
+    showViolationModalRef.current = false;
+    lastViolationTimeRef.current = Date.now();
+  }, []);
+
+  // Anti-cheating event listeners
+  useEffect(() => {
+    if (!hasStarted || submitting || autoSubmittingRef.current) return;
+
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!(
+        document.fullscreenElement ||
+        (document as any).webkitFullscreenElement
+      );
+
+      if (isFullscreen) {
+        setShowViolationModal(false);
+        showViolationModalRef.current = false;
+      } else {
+        triggerViolation("Exited fullscreen mode");
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        triggerViolation("Switched tab or minimized window");
+      }
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [hasStarted, submitting, triggerViolation]);
 
   const handleConfirmSubmit = useCallback(async () => {
     setShowSubmitModal(false);
@@ -281,6 +404,104 @@ export default function QuizPage() {
           <NeonButton onClick={() => router.push("/")} variant="ghost" size="sm">
             Return to Base
           </NeonButton>
+        </div>
+      </div>
+    );
+  }
+
+  // Pre-Quiz "Start quiz" Screen
+  if (!hasStarted && questions.length > 0) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div className="w-full max-w-lg glass border-2 border-neon-cyan/30 rounded-2xl p-5 sm:p-8 shadow-[0_0_40px_rgba(0,243,255,0.15)] text-white space-y-6 my-auto">
+          {/* Branding Header */}
+          <div className="flex flex-col items-center justify-center gap-3 text-center border-b border-white/10 pb-5">
+            <Image
+              src="/logo.png"
+              alt="CYDROPRENEUR"
+              width={220}
+              height={55}
+              className="h-auto w-auto max-w-[180px] sm:max-w-[220px] object-contain"
+              priority
+            />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] sm:text-xs font-display uppercase tracking-widest text-neon-cyan border border-neon-cyan/30 bg-neon-cyan/10">
+              <ShieldAlert size={14} />
+              <span>Anti-Cheating Secure Environment</span>
+            </div>
+          </div>
+
+          {/* Player Info */}
+          <div className="bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm font-display tracking-wide space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-white/50 uppercase">PLAYER:</span>
+              <span className="text-neon-cyan font-bold truncate max-w-[180px] sm:max-w-[240px]">
+                {playerName}
+              </span>
+            </div>
+            {playerEmail && (
+              <div className="flex justify-between items-center">
+                <span className="text-white/50 uppercase">EMAIL:</span>
+                <span className="text-white/80 font-mono text-[11px] truncate max-w-[180px] sm:max-w-[240px]">
+                  {playerEmail}
+                </span>
+              </div>
+            )}
+            <div className="flex justify-between items-center">
+              <span className="text-white/50 uppercase">QUESTIONS:</span>
+              <span className="text-neon-pink font-bold">{questions.length} Items</span>
+            </div>
+          </div>
+
+          {/* Rules Section */}
+          <div className="space-y-3">
+            <h3 className="font-display text-xs uppercase tracking-widest text-white/70">
+              Exam Security Instructions
+            </h3>
+            <ul className="space-y-2.5 text-xs text-white/80 leading-relaxed font-sans">
+              <li className="flex items-start gap-2.5">
+                <span className="h-5 w-5 rounded-full bg-neon-cyan/20 border border-neon-cyan text-neon-cyan flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                  1
+                </span>
+                <span>
+                  <strong className="text-white font-display">Fullscreen Mode Required:</strong> The quiz will launch in fullscreen. Exiting fullscreen will flag a violation.
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="h-5 w-5 rounded-full bg-neon-cyan/20 border border-neon-cyan text-neon-cyan flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                  2
+                </span>
+                <span>
+                  <strong className="text-white font-display">No Tab Switching:</strong> Minimizing the window or switching browser tabs is strictly monitored.
+                </span>
+              </li>
+              <li className="flex items-start gap-2.5">
+                <span className="h-5 w-5 rounded-full bg-neon-pink/20 border border-neon-pink text-neon-pink flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">
+                  3
+                </span>
+                <span>
+                  <strong className="text-neon-pink font-display">3-Strike Auto-Submit Policy:</strong> Accumulating 3 violations will immediately auto-submit your quiz.
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Mobile Note */}
+          <p className="text-[10px] sm:text-xs text-white/40 italic text-center font-sans border-t border-white/10 pt-3">
+            Mobile users: Mute notifications and avoid swipe-to-exit gestures during your attempt.
+          </p>
+
+          {/* Start Quiz Action */}
+          <div className="pt-2">
+            <NeonButton
+              variant="cyan"
+              size="lg"
+              onClick={handleStartQuiz}
+              className="w-full flex items-center justify-center gap-2 text-sm sm:text-base py-3"
+            >
+              <Maximize size={18} />
+              <span>Start quiz</span>
+            </NeonButton>
+          </div>
         </div>
       </div>
     );
@@ -768,6 +989,98 @@ export default function QuizPage() {
                 >
                   {submitting ? "Submitting..." : "Yes, Submit"}
                 </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Security Violation Lockscreen Modal */}
+      <AnimatePresence>
+        {showViolationModal && !autoSubmitting && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="w-full max-w-md max-h-[90dvh] overflow-y-auto bg-black/90 border-2 border-neon-pink/70 rounded-2xl p-5 sm:p-6 shadow-[0_0_50px_rgba(255,0,85,0.35)] text-center space-y-4 my-auto"
+            >
+              <div className="mx-auto flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full border-2 border-neon-pink/50 bg-neon-pink/15 text-neon-pink animate-pulse">
+                <ShieldAlert size={28} className="sm:w-8 sm:h-8" />
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="font-display text-sm sm:text-base font-bold tracking-wider text-neon-pink uppercase">
+                  SECURITY VIOLATION DETECTED
+                </h3>
+                <p className="font-display text-[10px] sm:text-xs text-white/50 uppercase tracking-widest">
+                  Exam Workspace Locked
+                </p>
+              </div>
+
+              <div className="bg-neon-pink/10 border border-neon-pink/30 rounded-xl p-3 text-xs font-sans text-white/90 space-y-2">
+                <p className="font-semibold text-neon-pink font-display text-[11px] sm:text-xs">
+                  REASON: {violationReason.toUpperCase()}
+                </p>
+                <div className="flex items-center justify-between border-t border-neon-pink/20 pt-2 font-display text-[10px] sm:text-xs">
+                  <span className="text-white/60">VIOLATIONS COUNT:</span>
+                  <span className="text-neon-pink font-bold">{violations} / 3</span>
+                </div>
+                <div className="flex items-center justify-between font-display text-[10px] sm:text-xs">
+                  <span className="text-white/60">CHANCES REMAINING:</span>
+                  <span className="text-neon-cyan font-bold">{3 - violations}</span>
+                </div>
+              </div>
+
+              <p className="font-sans text-xs text-white/70 leading-relaxed">
+                You must return to fullscreen mode to resume your quiz. Switched tabs or exited fullscreen count towards auto-submission limit.
+              </p>
+
+              <div className="pt-2">
+                <NeonButton
+                  variant="pink"
+                  size="md"
+                  onClick={handleResumeFromViolation}
+                  className="w-full flex items-center justify-center gap-2 text-xs sm:text-sm py-2.5"
+                >
+                  <Maximize size={16} />
+                  <span>Restore Fullscreen</span>
+                </NeonButton>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Auto-Submitting Protocol Overlay */}
+      <AnimatePresence>
+        {autoSubmitting && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="w-full max-w-md bg-black border-2 border-red-600 rounded-2xl p-6 shadow-[0_0_60px_rgba(220,38,38,0.6)] text-center space-y-5 my-auto"
+            >
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border-2 border-red-500 bg-red-500/20 text-red-500 animate-spin">
+                <Lock size={32} />
+              </div>
+
+              <div className="space-y-1">
+                <h3 className="font-display text-base sm:text-lg font-bold tracking-wider text-red-500 uppercase">
+                  TERMINATION PROTOCOL ACTIVATED
+                </h3>
+                <p className="font-display text-xs text-red-400/80 uppercase tracking-widest">
+                  3 Security Violations Reached
+                </p>
+              </div>
+
+              <p className="font-sans text-xs sm:text-sm text-white/80 leading-relaxed">
+                You have exceeded the maximum allowed tab-switches or fullscreen exits. Your quiz answers are now being automatically finalized and submitted.
+              </p>
+
+              <div className="flex items-center justify-center gap-2 text-neon-cyan font-display text-xs tracking-widest pt-2">
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-neon-cyan border-t-transparent" />
+                <span>FINALIZING SUBMISSION...</span>
               </div>
             </motion.div>
           </div>

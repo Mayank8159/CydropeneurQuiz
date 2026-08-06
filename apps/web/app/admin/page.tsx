@@ -43,19 +43,19 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4 py-6 sm:py-10">
-      <div className="w-full max-w-[400px] space-y-6 my-auto pb-8">
+    <div suppressHydrationWarning className="flex min-h-dvh items-end sm:items-center justify-center px-4 pt-32 pb-8 sm:pt-48 sm:pb-12 overflow-y-auto">
+      <div suppressHydrationWarning className="w-full max-w-[320px] sm:max-w-[340px] space-y-4 mt-36 sm:mt-52 md:mt-60 mb-4">
 
         {/* Glassmorphism Card Container */}
         <div
-          className="flex flex-col w-full rounded-2xl p-5 sm:p-6 shadow-2xl border-2 border-white/30 text-white bg-white/[0.12] backdrop-blur-2xl shadow-[0_0_40px_rgba(255,255,255,0.12)] justify-center"
+          className="flex flex-col w-full rounded-2xl p-4 sm:p-5 shadow-2xl border-2 border-white/30 text-white bg-white/[0.12] backdrop-blur-2xl shadow-[0_0_40px_rgba(255,255,255,0.12)] justify-center"
         >
           {/* Title */}
-          <h2 className="text-base sm:text-lg text-center font-display font-normal tracking-wide uppercase text-white mb-6">
+          <h2 className="text-xs sm:text-sm text-center font-display font-normal tracking-wide uppercase text-white mb-4">
             ADMIN TERMINAL
           </h2>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-4 sm:gap-5">
+          <form onSubmit={handleLogin} className="flex flex-col gap-3 sm:gap-3.5">
             <NeonInput
               label="Admin Username"
               type="text"
@@ -63,8 +63,8 @@ export default function AdminPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
-              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"
+              labelClassName="text-white/90 font-normal text-[9px] tracking-normal mb-1"
+              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-xs h-9"
             />
 
             <NeonInput
@@ -75,8 +75,8 @@ export default function AdminPage() {
               onChange={(e) => setPasskey(e.target.value)}
               required
               showPasswordToggle
-              labelClassName="text-white/90 font-normal text-[10px] tracking-normal"
-              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-sm"
+              labelClassName="text-white/90 font-normal text-[9px] tracking-normal mb-1"
+              className="bg-black/40 border-white/25 text-white placeholder:text-white/40 focus:border-white focus:shadow-[0_0_15px_rgba(255,255,255,0.25)] text-xs h-9"
             />
 
             <AnimatePresence>
@@ -85,9 +85,9 @@ export default function AdminPage() {
                   initial={{ opacity: 0, y: -10, height: 0 }}
                   animate={{ opacity: 1, y: 0, height: "auto" }}
                   exit={{ opacity: 0, y: -10, height: 0 }}
-                  className="animate-glitch overflow-hidden rounded-md border border-white/20 bg-white/5 px-4 py-3 text-center"
+                  className="animate-glitch overflow-hidden rounded-md border border-white/20 bg-white/5 px-3 py-2 text-center"
                 >
-                  <span className="font-display text-xs font-normal tracking-normal text-white">
+                  <span className="font-display text-[10px] font-normal tracking-normal text-white">
                     {error}
                   </span>
                 </motion.div>
@@ -99,11 +99,11 @@ export default function AdminPage() {
               whileHover={{ scale: loading ? 1 : 1.02 }}
               whileTap={{ scale: loading ? 1 : 0.98 }}
               disabled={loading}
-              className="w-full mt-2 font-display font-normal uppercase tracking-normal border-2 border-white text-white bg-transparent h-11 rounded-md transition-all duration-300 hover:bg-white/10 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed text-center flex items-center justify-center text-sm"
+              className="w-full mt-1 font-display font-normal uppercase tracking-normal border-2 border-white text-white bg-transparent h-9.5 rounded-md transition-all duration-300 hover:bg-white/10 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed text-center flex items-center justify-center text-xs"
             >
               {loading ? (
-                <span className="flex items-center gap-2 text-xs">
-                  <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                <span className="flex items-center gap-2 text-[10px]">
+                  <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   Processing...
                 </span>
               ) : (
@@ -114,10 +114,10 @@ export default function AdminPage() {
         </div>
 
         {/* Footer Link */}
-        <div className="text-center mt-2">
+        <div className="text-center mt-1.5">
           <a
             href="/"
-            className="inline-block rounded-full bg-black/80 border border-white/50 px-5 py-2.5 font-display text-xs font-bold uppercase tracking-widest text-white shadow-[0_0_20px_rgba(0,0,0,0.9)] backdrop-blur-md transition-all duration-300 hover:border-neon-cyan hover:text-neon-cyan hover:shadow-[0_0_20px_rgba(0,243,255,0.5)]"
+            className="inline-block rounded-full bg-black/80 border border-white/50 px-4 py-2 font-display text-[10px] font-bold uppercase tracking-widest text-white shadow-[0_0_20px_rgba(0,0,0,0.9)] backdrop-blur-md transition-all duration-300 hover:border-neon-cyan hover:text-neon-cyan hover:shadow-[0_0_20px_rgba(0,243,255,0.5)]"
           >
             Back to Main Terminal
           </a>
