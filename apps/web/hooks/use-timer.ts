@@ -23,6 +23,22 @@ export function useTimer() {
     }
   }, [isRunning, tick]);
 
+  /**
+   * Resumes the timer from a previously stored epoch timestamp.
+   * Use this when restoring a quiz session after a page refresh so
+   * the elapsed time is calculated from the original start, not now.
+   */
+  const startFrom = useCallback(
+    (epochMs: number) => {
+      if (!isRunning) {
+        startTimeRef.current = epochMs;
+        setIsRunning(true);
+        rafRef.current = requestAnimationFrame(tick);
+      }
+    },
+    [isRunning, tick]
+  );
+
   const stop = useCallback(() => {
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
@@ -50,5 +66,5 @@ export function useTimer() {
     };
   }, []);
 
-  return { elapsedMs, isRunning, start, stop, reset };
+  return { elapsedMs, isRunning, start, startFrom, stop, reset };
 }

@@ -118,11 +118,43 @@ export function checkPlayerName(name: string) {
   );
 }
 
-export function checkParticipantEmail(email: string) {
-  return apiFetch<{ exists: boolean }>(
-    `/api/check-participant?email=${encodeURIComponent(email)}`
-  );
+export async function checkParticipantEmail(email: string) {
+  const normalized = email.trim().toLowerCase();
+  let primaryFailed = false;
+
+  try {
+    const res = await apiFetch<{ exists: boolean }>(
+      `/api/check-participant?email=${encodeURIComponent(normalized)}`
+    );
+    if (res && res.exists) {
+      return res;
+    }
+    // Primary responded but email was not found
+    if (!primaryFailed) return res;
+  } catch (err) {
+    console.warn("Primary API check-participant call failed, attempting local fallback:", err);
+    primaryFailed = true;
+  }
+
+  try {
+    const res = await fetch(`/api/check-participant?email=${encodeURIComponent(normalized)}`, {
+      cache: "no-store",
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.error("Local fallback check-participant failed:", e);
+    // Both calls threw — server is unreachable
+    throw new Error("SERVER_UNAVAILABLE");
+  }
+
+  // Primary failed (network error) and fallback returned a non-ok response
+  if (primaryFailed) throw new Error("SERVER_UNAVAILABLE");
+
+  return { exists: false };
 }
+
 
 export function adminClearData() {
   return apiFetch<{ success: boolean; questionsCleared: number; submissionsCleared: number }>(
