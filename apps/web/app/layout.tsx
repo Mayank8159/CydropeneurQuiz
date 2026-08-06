@@ -32,7 +32,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icon.svg" />
@@ -44,6 +44,7 @@ export default function RootLayout({
       </head>
       <body
         className="text-ice-white min-h-dvh font-body antialiased"
+        suppressHydrationWarning
       >
         <ScanlineOverlay />
         <PwaInstallPrompt />

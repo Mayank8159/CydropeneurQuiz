@@ -93,9 +93,11 @@ export function verifyAdminUser(username: string, passkey: string): boolean {
   // Reads NEXT_PUBLIC_DEV_ADMIN_* from .env.local (gitignored).
   // Production ADMIN_EMAIL / ADMIN_PASSKEY are blanked in .env.local so they
   // cannot be used here either.
-  const devEmail = (process.env.NEXT_PUBLIC_DEV_ADMIN_EMAIL || "").trim().toLowerCase();
-  const devpassKey = process.env.NEXT_PUBLIC_DEV_ADMIN_PASSKEY || "";
-  if (devEmail && devpassKey && normalized === devEmail) {
+  const devEmail = (process.env.NEXT_PUBLIC_DEV_ADMIN_EMAIL || process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  const devpassKey = process.env.NEXT_PUBLIC_DEV_ADMIN_PASSKEY || process.env.ADMIN_PASSKEY || "";
+  const allowedEmails = devEmail.split(",").map((e) => e.trim().toLowerCase()).filter(Boolean);
+
+  if (allowedEmails.length > 0 && allowedEmails.includes(normalized) && devpassKey) {
     return timingSafeEqualString(passkey, devpassKey);
   }
 

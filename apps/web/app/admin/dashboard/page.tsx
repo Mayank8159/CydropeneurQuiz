@@ -127,8 +127,8 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <div className="min-h-dvh px-3 py-6 sm:px-4 sm:py-8">
-      <div className="mx-auto max-w-5xl space-y-6 sm:space-y-8">
+    <div suppressHydrationWarning className="min-h-dvh px-3 py-6 sm:px-4 sm:py-8">
+      <div suppressHydrationWarning className="mx-auto max-w-5xl space-y-6 sm:space-y-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <GlitchText
             text="ADMIN DASHBOARD"
@@ -160,7 +160,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Question Form Section */}
-        <CyberCard glow="pink" className="bg-white/[0.08] border-white/25 backdrop-blur-xl">
+        <CyberCard glow="none" className="bg-black/95 border-white/20 backdrop-blur-2xl">
           <div className="mb-4 flex items-center gap-2 text-neon-pink sm:mb-6">
             <Database size={18} />
             <h2 className="font-display text-xs uppercase tracking-widest sm:text-sm">
@@ -171,7 +171,7 @@ export default function AdminDashboardPage() {
         </CyberCard>
 
         {/* Deployed Questions Section */}
-        <CyberCard glow="cyan" className="bg-white/[0.08] border-white/25 backdrop-blur-xl">
+        <CyberCard glow="none" className="bg-black/95 border-white/20 backdrop-blur-2xl">
           <div className="mb-4 flex items-center justify-between sm:mb-6">
             <div className="flex items-center gap-2 text-neon-cyan">
               <List size={18} />
@@ -199,7 +199,7 @@ export default function AdminDashboardPage() {
         </CyberCard>
 
         {/* Leaderboard Section */}
-        <CyberCard glow="cyan" className="bg-white/[0.08] border-white/25 backdrop-blur-xl">
+        <CyberCard glow="none" className="bg-black/95 border-white/20 backdrop-blur-2xl">
           <div className="mb-4 flex items-center justify-between sm:mb-6">
             <div className="flex items-center gap-2 text-neon-cyan">
               <BarChart3 size={18} />
@@ -223,7 +223,7 @@ export default function AdminDashboardPage() {
         </CyberCard>
 
         {/* Danger Zone */}
-        <CyberCard glow="pink" className="bg-white/[0.08] border-white/25 backdrop-blur-xl">
+        <CyberCard glow="none" className="bg-black/95 border-white/20 backdrop-blur-2xl">
           <div className="mb-4 flex items-center gap-2 text-red-400 sm:mb-6">
             <Trash2 size={18} />
             <h2 className="font-display text-xs uppercase tracking-widest sm:text-sm">
