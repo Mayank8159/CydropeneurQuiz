@@ -18,7 +18,7 @@ interface Question {
   options: { a: string; b: string; c: string; d: string };
 }
 
-const TOTAL_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+const TOTAL_LIMIT_MS = 20 * 60 * 1000; // 20 minutes
 
 /**
  * Returns true for iOS Safari, Android Chrome, and other mobile browsers
@@ -87,6 +87,15 @@ const getCategoryForQuestion = (qNumber: number): string => {
   };
   return categories[qNumber] || "General Tech";
 };
+
+function shuffleArray<T>(array: T[]): T[] {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export default function QuizPage() {
   const router = useRouter();
@@ -234,9 +243,42 @@ export default function QuizPage() {
 
     fetchQuestions()
       .then((q) => {
-        setQuestions(q);
+        let finalQuestions = q;
+        if (q.length > 0) {
+          const savedOrder =
+            sessionStorage.getItem("quiz_question_order") ||
+            localStorage.getItem("quiz_question_order");
+          if (savedOrder) {
+            try {
+              const orderIds = JSON.parse(savedOrder) as string[];
+              const mapped = new Map(q.map((item) => [item.qId, item]));
+              const ordered = orderIds
+                .map((id) => mapped.get(id))
+                .filter(Boolean) as typeof q;
+              if (ordered.length === q.length) {
+                finalQuestions = ordered;
+              } else {
+                finalQuestions = shuffleArray(q);
+                const orderStr = JSON.stringify(finalQuestions.map((item) => item.qId));
+                sessionStorage.setItem("quiz_question_order", orderStr);
+                localStorage.setItem("quiz_question_order", orderStr);
+              }
+            } catch (e) {
+              finalQuestions = shuffleArray(q);
+              const orderStr = JSON.stringify(finalQuestions.map((item) => item.qId));
+              sessionStorage.setItem("quiz_question_order", orderStr);
+              localStorage.setItem("quiz_question_order", orderStr);
+            }
+          } else {
+            finalQuestions = shuffleArray(q);
+            const orderStr = JSON.stringify(finalQuestions.map((item) => item.qId));
+            sessionStorage.setItem("quiz_question_order", orderStr);
+            localStorage.setItem("quiz_question_order", orderStr);
+          }
+        }
+        setQuestions(finalQuestions);
         setLoading(false);
-        if (q.length === 0) {
+        if (finalQuestions.length === 0) {
           setError("NO QUESTIONS ADDED // AWAITING QUESTION DEPLOYMENT");
           setErrorType("empty");
         } else {
@@ -296,9 +338,11 @@ export default function QuizPage() {
       sessionStorage.removeItem("quiz_violations");
       sessionStorage.removeItem("quiz_has_started");
       sessionStorage.removeItem("quiz_start_time");
+      sessionStorage.removeItem("quiz_question_order");
       localStorage.removeItem("quiz_violations");
       localStorage.removeItem("quiz_has_started");
       localStorage.removeItem("quiz_start_time");
+      localStorage.removeItem("quiz_question_order");
     } catch (e) {
       console.warn("Storage cleanup error:", e);
     }
@@ -752,7 +796,7 @@ export default function QuizPage() {
             <div className="bg-black/50 backdrop-blur-xl border-2 border-white/20 rounded-2xl p-4 sm:p-5 shadow-2xl space-y-4">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <span className="font-display text-[10px] tracking-widest text-white/40 uppercase">
-                  Question {currentQuestion?.qNumber} of {questions.length}
+                  Question {currentIndex + 1} of {questions.length}
                 </span>
 
                 {/* Clear Selection Button */}
@@ -771,7 +815,7 @@ export default function QuizPage() {
                 {currentQuestion && (
                   <QuestionCard
                     key={currentQuestion.qId}
-                    qNumber={currentQuestion.qNumber}
+                    qNumber={currentIndex + 1}
                     question={currentQuestion.question}
                     options={currentQuestion.options}
                     selectedAnswer={currentAnswer}
